@@ -71,7 +71,7 @@ const RootNavigator = () => {
   return (
     <Stack.Navigator 
       key="unauthenticated"
-      initialRouteName="Intro"
+      initialRouteName="Welcome"
       screenOptions={{ 
         headerShown: false,
         animation: 'fade_from_bottom',
