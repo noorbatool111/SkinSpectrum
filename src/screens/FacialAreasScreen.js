@@ -17,7 +17,7 @@ const { width } = Dimensions.get('window');
 const AREA_SIZE = (width - 56 - 24) / 3; // 3 columns with gaps
 
 const FacialAreasScreen = ({ navigation }) => {
-  const { setFacialAreas, setUserChallenges } = useUser();
+  const { syncProfileData } = useUser();
   const [selectedAreas, setSelectedAreas] = useState([]);
   const [selectedChallenges, setSelectedChallenges] = useState([]);
 
@@ -95,10 +95,12 @@ const FacialAreasScreen = ({ navigation }) => {
 
   const isValid = selectedAreas.length > 0 && selectedChallenges.length > 0;
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (isValid) {
-      setFacialAreas(selectedAreas);
-      setUserChallenges(selectedChallenges);
+      await syncProfileData({
+        facialAreas: selectedAreas,
+        userChallenges: selectedChallenges
+      });
       navigation.navigate('ProfileSetup');
     }
   };

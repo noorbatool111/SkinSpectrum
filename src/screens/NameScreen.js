@@ -18,7 +18,7 @@ import { useUser } from '../context/UserContext';
 const { width } = Dimensions.get('window');
 
 const NameScreen = ({ navigation }) => {
-  const { setUserName } = useUser();
+  const { syncProfileData } = useUser();
   const [name, setName] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
@@ -74,9 +74,9 @@ const NameScreen = ({ navigation }) => {
 
   const isValid = name.trim().length >= 2;
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (isValid) {
-      setUserName(name.trim());
+      await syncProfileData({ name: name.trim() });
       navigation.navigate('Gender');
     }
   };
@@ -225,8 +225,8 @@ const NameScreen = ({ navigation }) => {
           {/* Skip option */}
           <TouchableOpacity
             style={styles.skipButton}
-            onPress={() => {
-              setUserName('Friend');
+            onPress={async () => {
+              await syncProfileData({ name: 'Friend' });
               navigation.navigate('Gender');
             }}
             activeOpacity={0.6}

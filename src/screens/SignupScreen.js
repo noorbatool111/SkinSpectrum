@@ -20,7 +20,7 @@ import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 import * as Google from 'expo-auth-session/providers/google';
 import * as Facebook from 'expo-auth-session/providers/facebook';
-import { loginUser, googleAuth, facebookAuth } from '../services/api';
+import { registerUser, googleAuth, facebookAuth } from '../services/api';
 import { useUser } from '../context/UserContext';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -28,7 +28,7 @@ WebBrowser.maybeCompleteAuthSession();
 const { width } = Dimensions.get('window');
 const LOGO_SIZE = 100;
 
-const LoginScreen = ({ navigation }) => {
+const SignupScreen = ({ navigation }) => {
   const { signIn } = useUser();
   const headerFade = useRef(new Animated.Value(0)).current;
   const headerSlide = useRef(new Animated.Value(-20)).current;
@@ -37,6 +37,7 @@ const LoginScreen = ({ navigation }) => {
 
   // New state for form handling
   const [isEmailView, setIsEmailView] = useState(false);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -74,7 +75,7 @@ const LoginScreen = ({ navigation }) => {
   useEffect(() => {
     if (responseGoogle?.type === 'success') {
       const { id_token } = responseGoogle.params;
-      handleSocialLogin('google', id_token);
+      handleSocialSignup('google', id_token);
     }
   }, [responseGoogle]);
 
@@ -82,11 +83,11 @@ const LoginScreen = ({ navigation }) => {
   useEffect(() => {
     if (responseFacebook?.type === 'success') {
       const { access_token } = responseFacebook.authentication;
-      handleSocialLogin('facebook', access_token);
+      handleSocialSignup('facebook', access_token);
     }
   }, [responseFacebook]);
 
-  const handleSocialLogin = async (provider, token) => {
+  const handleSocialSignup = async (provider, token) => {
     setLoading(true);
     setErrorMsg('');
     try {
@@ -99,27 +100,27 @@ const LoginScreen = ({ navigation }) => {
       await signIn(data.token, data.user);
       // App.js root navigator will automatically switch to Privacy/Home
     } catch (error) {
-      setErrorMsg(`${provider} login failed. Please try again.`);
+      setErrorMsg(`${provider} sign up failed. Please try again.`);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEmailLogin = async () => {
-    if (!email || !password) {
-      setErrorMsg('Please enter email and password');
+  const handleEmailSignup = async () => {
+    if (!name || !email || !password) {
+      setErrorMsg('Please fill in all fields');
       return;
     }
     
     setLoading(true);
     setErrorMsg('');
     try {
-      const data = await loginUser(email, password);
+      const data = await registerUser(name, email, password);
       // Success! Token is saved securely to device
       await signIn(data.token, data.user);
       // App.js root navigator will automatically switch to Privacy/Home
     } catch (error) {
-      setErrorMsg(error.response?.data?.message || 'Invalid email or password');
+      setErrorMsg(error.response?.data?.message || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -128,6 +129,7 @@ const LoginScreen = ({ navigation }) => {
   const renderButtons = () => (
     <View>
       {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
+      
       <TouchableOpacity 
         style={[styles.socialButton, styles.googleButton]} 
         activeOpacity={0.85}
@@ -137,7 +139,7 @@ const LoginScreen = ({ navigation }) => {
         <View style={styles.socialIconBox}>
           <AntDesign name="google" size={20} color="#DB4437" />
         </View>
-        <Text style={[styles.socialText, styles.googleText]}>Continue with Google</Text>
+        <Text style={[styles.socialText, styles.googleText]}>Sign up with Google</Text>
       </TouchableOpacity>
 
       <TouchableOpacity 
@@ -149,7 +151,7 @@ const LoginScreen = ({ navigation }) => {
         <View style={styles.socialIconBox}>
           <FontAwesome name="facebook" size={20} color="#FFF" />
         </View>
-        <Text style={[styles.socialText, styles.facebookText]}>Continue with Facebook</Text>
+        <Text style={[styles.socialText, styles.facebookText]}>Sign up with Facebook</Text>
       </TouchableOpacity>
 
       <View style={styles.divider}>
@@ -164,9 +166,9 @@ const LoginScreen = ({ navigation }) => {
         onPress={() => setIsEmailView(true)}
       >
         <Ionicons name="mail-outline" size={20} color="#5C3318" />
-        <Text style={styles.emailButtonText}>Login with Email</Text>
+        <Text style={styles.emailButtonText}>Sign up with Email</Text>
       </TouchableOpacity>
-
+      
       {loading && <ActivityIndicator color="#5C3318" style={{ marginTop: 20 }} />}
     </View>
   );
@@ -174,6 +176,17 @@ const LoginScreen = ({ navigation }) => {
   const renderEmailForm = () => (
     <View style={styles.formContainer}>
       {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
+      
+      <View style={styles.inputGroup}>
+        <Text style={styles.inputLabel}>Full Name</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Jane Doe"
+          placeholderTextColor="#B5A48E"
+          value={name}
+          onChangeText={setName}
+        />
+      </View>
       
       <View style={styles.inputGroup}>
         <Text style={styles.inputLabel}>Email Address</Text>
@@ -202,13 +215,13 @@ const LoginScreen = ({ navigation }) => {
 
       <TouchableOpacity 
         style={styles.submitButton} 
-        onPress={handleEmailLogin}
+        onPress={handleEmailSignup}
         disabled={loading}
       >
         {loading ? (
           <ActivityIndicator color="#FFF" />
         ) : (
-          <Text style={styles.submitButtonText}>Log In</Text>
+          <Text style={styles.submitButtonText}>Create Account</Text>
         )}
       </TouchableOpacity>
 
@@ -242,19 +255,17 @@ const LoginScreen = ({ navigation }) => {
           </Animated.View>
 
           <Animated.View style={[styles.bottomCard, { opacity: cardFade, transform: [{ translateY: cardSlide }] }]}>
-            <Text style={styles.cardTitle}>Welcome back</Text>
-            <Text style={styles.cardSubtitle}>Sign in to continue your skin health journey</Text>
+            <Text style={styles.cardTitle}>Create an account</Text>
+            <Text style={styles.cardSubtitle}>Join SkinSpectrum and start your skin health journey</Text>
 
             {isEmailView ? renderEmailForm() : renderButtons()}
 
-            {!isEmailView && (
-              <View style={styles.signInRow}>
-                <Text style={styles.signInText}>Don't have an account? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate('Signup')} activeOpacity={0.7}>
-                  <Text style={styles.signInLink}>Sign up</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+            <View style={styles.signInRow}>
+              <Text style={styles.signInText}>Already have an account? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')} activeOpacity={0.7}>
+                <Text style={styles.signInLink}>Sign in</Text>
+              </TouchableOpacity>
+            </View>
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -262,6 +273,7 @@ const LoginScreen = ({ navigation }) => {
   );
 };
 
+// ... keep existing styles
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FAF6EF' },
   decorCircle: { position: 'absolute', width: 250, height: 250, borderRadius: 125, backgroundColor: 'rgba(130, 90, 59, 0.03)' },
@@ -310,4 +322,4 @@ const styles = StyleSheet.create({
   signInLink: { color: '#5C3318', fontSize: 14, fontWeight: '700' }
 });
 
-export default LoginScreen;
+export default SignupScreen;

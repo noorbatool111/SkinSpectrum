@@ -139,7 +139,11 @@ const HomeScreen = ({ navigation }) => {
             <Text style={styles.greeting}>{greeting()},</Text>
             <Text style={styles.userName}>{displayName} ✨</Text>
           </View>
-          <TouchableOpacity style={styles.avatarSmall} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={styles.avatarSmall} 
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('Profile')}
+          >
             <Text style={styles.avatarSmallText}>
               {displayName.charAt(0).toUpperCase()}
             </Text>
@@ -280,7 +284,11 @@ const HomeScreen = ({ navigation }) => {
           <Ionicons name="analytics-outline" size={24} color="#B5A48E" />
           <Text style={styles.navLabel}>Progress</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} activeOpacity={0.7}>
+        <TouchableOpacity 
+          style={styles.navItem} 
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate('Profile')}
+        >
           <Ionicons name="person-outline" size={24} color="#B5A48E" />
           <Text style={styles.navLabel}>Profile</Text>
         </TouchableOpacity>

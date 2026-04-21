@@ -26,6 +26,7 @@ const ProfileSetupScreen = ({ navigation }) => {
     skinConcerns,
     facialAreas,
     userChallenges,
+    syncProfileData,
   } = useUser();
 
   const [avatarUri, setAvatarUri] = useState(null);
@@ -119,7 +120,8 @@ const ProfileSetupScreen = ({ navigation }) => {
     console.log('Open image picker');
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    await syncProfileData({ isOnboardingComplete: true });
     navigation.reset({
       index: 0,
       routes: [{ name: 'Home' }],

@@ -16,7 +16,7 @@ import { useUser } from '../context/UserContext';
 const { width } = Dimensions.get('window');
 
 const AgeScreen = ({ navigation }) => {
-  const { userName, setUserAge } = useUser();
+  const { userName, syncProfileData } = useUser();
   const [selected, setSelected] = useState(null);
 
   const headerFade = useRef(new Animated.Value(0)).current;
@@ -79,9 +79,9 @@ const AgeScreen = ({ navigation }) => {
     { key: '55+', label: '55+', emoji: '👴', desc: 'Priority screening' },
   ];
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selected) {
-      setUserAge(selected);
+      await syncProfileData({ age: selected });
       navigation.navigate('SkinType');
     }
   };

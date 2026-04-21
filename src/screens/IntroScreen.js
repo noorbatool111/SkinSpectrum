@@ -176,7 +176,7 @@ const IntroScreen = ({ navigation }) => {
         >
           <TouchableOpacity
             style={styles.primaryButton}
-            onPress={() => navigation.navigate('Privacy')}
+            onPress={() => navigation.navigate('Signup')}
             activeOpacity={0.85}
           >
             <Text style={styles.primaryButtonText}>Get Started</Text>

@@ -17,7 +17,7 @@ const CARD_GAP = 14;
 const CARD_WIDTH = (width - 56 - CARD_GAP) / 2;
 
 const GenderScreen = ({ navigation }) => {
-  const { userName, setUserGender } = useUser();
+  const { userName, syncProfileData } = useUser();
   const [selected, setSelected] = useState(null);
 
   const headerFade = useRef(new Animated.Value(0)).current;
@@ -124,9 +124,9 @@ const GenderScreen = ({ navigation }) => {
     },
   ];
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selected) {
-      setUserGender(selected);
+      await syncProfileData({ gender: selected });
       navigation.navigate('Age');
     }
   };

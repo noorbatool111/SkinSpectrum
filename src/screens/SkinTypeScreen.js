@@ -16,7 +16,7 @@ import { useUser } from '../context/UserContext';
 const { width } = Dimensions.get('window');
 
 const SkinTypeScreen = ({ navigation }) => {
-  const { setSkinType, setSkinConcerns } = useUser();
+  const { syncProfileData } = useUser();
   const [selectedType, setSelectedType] = useState(null);
   const [selectedConcerns, setSelectedConcerns] = useState([]);
 
@@ -84,10 +84,12 @@ const SkinTypeScreen = ({ navigation }) => {
 
   const isValid = selectedType !== null && selectedConcerns.length > 0;
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (isValid) {
-      setSkinType(selectedType);
-      setSkinConcerns(selectedConcerns);
+      await syncProfileData({
+        skinType: selectedType,
+        skinConcerns: selectedConcerns
+      });
       navigation.navigate('FacialAreas');
     }
   };
