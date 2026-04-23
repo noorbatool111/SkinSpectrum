@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pillow
+opencv-python
+mediapipe
+tensorflow
+torch
+torchvision
+boto3
+python-dotenv
+python-jose
+transformers
+scipy
+tqdm

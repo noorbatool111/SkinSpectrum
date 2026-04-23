@@ -28,7 +28,20 @@
     },
     "plugins": [
       "expo-web-browser",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow SkinSpectrum to access your camera to analyze your skin."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow SkinSpectrum to access your photos for skin analysis.",
+          "cameraPermission": "Allow SkinSpectrum to access your camera."
+        }
+      ]
     ]
   }
 }
