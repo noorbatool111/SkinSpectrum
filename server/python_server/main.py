@@ -1,207 +1,179 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, UploadFile, File
 import uvicorn
-import cv2
 import numpy as np
-import os
-import math
-from typing import List
+import cv2
+from keras.models import load_model
 import mediapipe as mp
-from PIL import Image
-import io
 
-# Initialize FastAPI app
-app = FastAPI(title="SkinSpectrum AI Analysis API")
+app = FastAPI()
 
-# Enable CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Load model (optional)
+model = load_model("skin_model.h5", compile=False)
 
-# Initialize Mediapipe Face Mesh
+# MediaPipe setup
 mp_face_mesh = mp.solutions.face_mesh
-face_mesh = mp_face_mesh.FaceMesh(
-    static_image_mode=True, 
-    max_num_faces=1,
-    refine_landmarks=True,
-    min_detection_confidence=0.5
-)
 
-# Initialize Skin Classification Model (Hugging Face)
-# This uses a pre-trained model for skin disease classification
-try:
-    from transformers import pipeline
-    print("Loading Skin Analysis Model (this may take a minute on first run)...")
-    skin_classifier = pipeline("image-classification", model="denis-isik/skin-disease-classification")
-    print("Model loaded successfully!")
-except Exception as e:
-    print(f"Warning: Could not load skin classifier: {e}")
-    skin_classifier = None
 
-def calculate_distance(p1, p2):
-    """Calculate Euclidean distance between two landmarks."""
-    return math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2 + (p1.z - p2.z)**2)
+# -------------------------
+# PREPROCESS
+# -------------------------
+def preprocess(image_bytes):
+    nparr = np.frombuffer(image_bytes, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-def detect_face_shape(landmarks):
-    """
-    Detect face shape based on facial landmark ratios.
-    Ratios are calculated using heights and widths at key points.
-    """
-    # Key Landmarks:
-    # Top: 10, Bottom: 152
-    # Left Forehead: 103, Right Forehead: 332
-    # Left Cheek: 234, Right Cheek: 454
-    # Left Jaw: 58, Right Jaw: 288
+    h, w, _ = img.shape
+    img_crop = img[int(h*0.2):int(h*0.9), int(w*0.2):int(w*0.8)]
 
-    face_height = calculate_distance(landmarks[10], landmarks[152])
-    forehead_width = calculate_distance(landmarks[103], landmarks[332])
-    cheekbone_width = calculate_distance(landmarks[234], landmarks[454])
-    jaw_width = calculate_distance(landmarks[58], landmarks[288])
-    
-    # Ratio of Height to Cheekbone Width
-    ratio_hw = face_height / cheekbone_width
-    
-    if ratio_hw > 1.5:
-        return "Oblong"
-    elif 1.25 < ratio_hw <= 1.5:
-        if forehead_width > cheekbone_width * 0.9 and cheekbone_width > jaw_width * 1.1:
-            return "Heart"
-        else:
-            return "Oval"
-    elif 1.0 <= ratio_hw <= 1.25:
-        if jaw_width >= cheekbone_width * 0.85:
-            return "Square"
-        else:
-            return "Round"
+    img_resized = cv2.resize(img_crop, (224, 224))
+    img_resized = img_resized / 255.0
+    img_resized = np.expand_dims(img_resized, axis=0)
+
+    return img_resized, img_crop
+
+
+# -------------------------
+# WRINKLES
+# -------------------------
+def detect_wrinkles(img):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.equalizeHist(gray)
+
+    laplacian = cv2.Laplacian(gray, cv2.CV_64F)
+    texture = np.abs(laplacian)
+
+    wrinkle_score = np.mean(texture)
+    print("Wrinkle texture score:", wrinkle_score)
+
+    if wrinkle_score < 5:
+        return 2
+    elif wrinkle_score < 10:
+        return 4
+    elif wrinkle_score < 20:
+        return 6
+    elif wrinkle_score < 35:
+        return 8
     else:
-        return "Diamond"
+        return 10
 
-def get_recommendations(conditions):
-    """Generate smart recommendations based on detected conditions."""
-    recommendations = []
-    
-    condition_names = [c['name'].lower() for c in conditions]
-    
-    if any(x in str(condition_names) for x in ['acne', 'pimples']):
-        recommendations.append("Use a gentle cleanser with Salicylic Acid or Benzoyl Peroxide.")
-        recommendations.append("Avoid touching or picking at your skin to prevent scarring.")
-    
-    if any(x in str(condition_names) for x in ['eczema', 'dermatitis', 'dry']):
-        recommendations.append("Focus on intensive hydration with ceramides and hyaluronic acid.")
-        recommendations.append("Avoid hot water and harsh soaps that strip natural oils.")
-        
-    if any(x in str(condition_names) for x in ['nevus', 'mole', 'pigmentation']):
-        recommendations.append("Monitor any changes in mole size or color; consult a dermatologist if concerned.")
-        recommendations.append("Apply broad-spectrum SPF 50 daily to prevent further pigmentation.")
 
-    if not recommendations:
-        recommendations = [
-            "Maintain a consistent double-cleansing routine.",
-            "Stay hydrated by drinking at least 2-3 liters of water daily.",
-            "Always wear sunscreen, even on cloudy days.",
-            "Include antioxidants like Vitamin C in your morning routine."
-        ]
-        
-    return recommendations[:4]
+# -------------------------
+# ACNE
+# -------------------------
+def detect_acne(img):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (5,5), 0)
 
-@app.get("/")
-async def root():
-    return {"message": "SkinSpectrum AI Analysis API is active and loaded."}
+    diff = cv2.absdiff(gray, blurred)
+    _, thresh = cv2.threshold(diff, 8, 255, cv2.THRESH_BINARY)
 
-@app.post("/analyze-skin")
-async def analyze_skin(file: UploadFile = File(...)):
-    try:
-        # Read image
-        contents = await file.read()
-        nparr = np.frombuffer(contents, np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        
-        if img is None:
-            raise HTTPException(status_code=400, detail="Invalid image file")
+    kernel = np.ones((3,3), np.uint8)
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
 
-        # Convert to RGB for Mediapipe and PIL
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        
-        # 1. Face Detection & Shape Analysis
-        results = face_mesh.process(img_rgb)
-        
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    small_spots = 0
+    large_areas = 0
+
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+
+        if 10 < area < 300:
+            small_spots += 1
+        elif area >= 300:
+            large_areas += 1
+
+    print("Small spots:", small_spots, "Large areas:", large_areas)
+
+    score = small_spots + (large_areas * 5)
+
+    if score < 3:
+        return 1
+    elif score < 10:
+        return 3
+    elif score < 25:
+        return 5
+    elif score < 50:
+        return 7
+    else:
+        return 9
+
+
+# -------------------------
+# FACE SHAPE (MediaPipe)
+# -------------------------
+def detect_face_shape(img):
+    with mp_face_mesh.FaceMesh(static_image_mode=True) as face_mesh:
+        results = face_mesh.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+
         if not results.multi_face_landmarks:
-            return {
-                "success": False,
-                "message": "No face detected. Please ensure your face is clearly visible and well-lit."
-            }
+            return "Unknown"
 
         landmarks = results.multi_face_landmarks[0].landmark
-        face_shape = detect_face_shape(landmarks)
 
-        # 2. Skin Condition Analysis (Actual ML Model)
-        pil_img = Image.fromarray(img_rgb)
-        conditions = []
-        
-        if skin_classifier:
-            # Run the model
-            predictions = skin_classifier(pil_img)
-            
-            # Convert model outputs to our app's format
-            for pred in predictions:
-                # Label cleanup
-                name = pred['label'].replace('_', ' ').capitalize()
-                # Score to 1-10 scale
-                severity = round(pred['score'] * 10, 1)
-                
-                if severity >= 1.0: # Only include significant detections
-                    conditions.append({
-                        "name": name,
-                        "severity": severity,
-                        "level": "High" if severity > 7 else "Medium" if severity > 4 else "Low"
-                    })
-        
-        # Fallback if no conditions detected or model failed
-        if not conditions:
-            conditions = [
-                {"name": "Clear Skin", "severity": 1.0, "level": "Optimal"}
-            ]
+        forehead = landmarks[10].y
+        chin = landmarks[152].y
+        left = landmarks[234].x
+        right = landmarks[454].x
 
-        # 3. Determine Skin Type (Texture Analysis approximation)
-        # In a real app, this would use a specific classifier. 
-        # Here we use a refined placeholder based on brightness/contrast as a proxy.
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        brightness = np.mean(gray)
-        std_dev = np.std(gray)
-        
-        if brightness > 180:
-            skin_type = "Oily (High Shine)"
-        elif brightness < 80:
-            skin_type = "Dry (Low Reflectivity)"
-        elif std_dev > 50:
-            skin_type = "Combination"
+        face_height = chin - forehead
+        face_width = right - left
+
+        ratio = face_height / face_width
+
+        if ratio > 1.5:
+            return "Oval"
+        elif ratio > 1.3:
+            return "Round"
         else:
-            skin_type = "Normal"
+            return "Square"
 
-        # 4. Generate Results
-        analysis_results = {
-            "face_shape": face_shape,
-            "skin_type": skin_type,
-            "conditions": conditions[:4],
-            "recommendations": get_recommendations(conditions),
-            "weather_advice": {
-                "uv_index": 4, # This would ideally come from a Weather API based on user location
-                "advice": "Moderate UV levels. Apply SPF 30+ sunscreen if going outdoors."
-            }
-        }
 
-        return {
-            "success": True,
-            "data": analysis_results
-        }
+# -------------------------
+# SKIN TYPE
+# -------------------------
+def detect_skin_type(img):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    brightness = np.mean(gray)
 
-    except Exception as e:
-        print(f"Error during analysis: {e}")
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+    print("Skin brightness:", brightness)
 
+    if brightness < 80:
+        return "Dry"
+    elif brightness < 140:
+        return "Normal"
+    else:
+        return "Oily"
+
+
+# -------------------------
+# API
+# -------------------------
+@app.post("/analyze")
+async def analyze(file: UploadFile = File(...)):
+    image_bytes = await file.read()
+
+    img_tensor, img_crop = preprocess(image_bytes)
+
+    pred = model.predict(img_tensor)[0]
+    print("Raw model prediction:", pred)
+
+    wrinkles_score = detect_wrinkles(img_crop)
+    acne_score = detect_acne(img_crop)
+    face_shape = detect_face_shape(img_crop)
+    skin_type = detect_skin_type(img_crop)
+
+    result = {
+        "acne": acne_score,
+        "wrinkles": wrinkles_score,
+        "face_shape": face_shape,
+        "skin_type": skin_type
+    }
+
+    return result
+
+
+# -------------------------
+# RUN SERVER
+# -------------------------
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)

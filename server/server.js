@@ -2,13 +2,18 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+
+// Routes
 const authRoutes = require('./routes/auth');
+const analyzeRoute = require('./routes/analyzeSkin'); // ✅ NEW
 
 dotenv.config();
 
 const app = express();
 
-// Middleware
+// -------------------------
+// MIDDLEWARE
+// -------------------------
 app.use(express.json());
 app.use(cors());
 
@@ -18,22 +23,30 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
+// -------------------------
+// ROUTES
+// -------------------------
 app.use('/api/auth', authRoutes);
+app.use('/api', analyzeRoute); // ✅ NEW (Python ML route)
 
-// Root route for testing connection
+// Root route
 app.get('/', (req, res) => {
   res.send('SkinSpectrum API is running...');
 });
 
-// Database Connection
+// -------------------------
+// DATABASE CONNECTION
+// -------------------------
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch((err) => console.error('❌ MongoDB connection error:', err));
 
-// Start Server
+// -------------------------
+// START SERVER
+// -------------------------
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
+  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
 });

@@ -1,12 +1,13 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
-// IMPORTANT: Replace with your computer's local IP address when running on a physical device or Expo Go!
-// e.g. http://192.168.x.x:5000
-// DO NOT USE localhost if you are testing on a real phone!
+// ⚠️ IMPORTANT: Replace with your PC IP (NOT localhost on mobile)
 const API_URL =
   process.env.EXPO_PUBLIC_API_URL || "http://192.168.18.13:5000/api";
 
+// -------------------------
+// AXIOS INSTANCE
+// -------------------------
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -14,7 +15,9 @@ const api = axios.create({
   },
 });
 
-// Intercept requests to attach the auth token automatically
+// -------------------------
+// AUTH TOKEN INTERCEPTOR
+// -------------------------
 api.interceptors.request.use(
   async (config) => {
     try {
@@ -23,98 +26,74 @@ api.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`;
       }
     } catch (error) {
-      console.log("Error fetching token for interceptor", error);
+      console.log("Token fetch error:", error);
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error)
 );
 
+// -------------------------
+// AUTH APIs
+// -------------------------
 export const loginUser = async (email, password) => {
-  const response = await api.post("/auth/login", { email, password });
-  return response.data;
+  const res = await api.post("/auth/login", { email, password });
+  return res.data;
 };
 
 export const registerUser = async (name, email, password) => {
-  const response = await api.post("/auth/signup", { name, email, password });
-  return response.data;
+  const res = await api.post("/auth/signup", { name, email, password });
+  return res.data;
 };
 
 export const googleAuth = async (idToken) => {
-  const response = await api.post("/auth/social/google", { idToken });
-  return response.data;
+  const res = await api.post("/auth/social/google", { idToken });
+  return res.data;
 };
 
 export const facebookAuth = async (accessToken) => {
-  const response = await api.post("/auth/social/facebook", { accessToken });
-  return response.data;
+  const res = await api.post("/auth/social/facebook", { accessToken });
+  return res.data;
 };
 
 export const getProfile = async () => {
-  const response = await api.get("/auth/me");
-  return response.data;
+  const res = await api.get("/auth/me");
+  return res.data;
 };
 
 export const updateProfile = async (profileData) => {
-  const response = await api.put("/auth/profile", profileData);
-  return response.data;
+  const res = await api.put("/auth/profile", profileData);
+  return res.data;
 };
 
+// -------------------------
+// 🔥 SKIN ANALYSIS (FINAL)
+// -------------------------
 export const analyzeSkinImage = async (imageUri) => {
   try {
-    // Create FormData to send image file
     const formData = new FormData();
-    formData.append("file", {
+
+    formData.append("image", {
       uri: imageUri,
       type: "image/jpeg",
-      name: "skin_analysis.jpg",
+      name: "skin.jpg",
     });
 
-    // Use axios directly to send FormData (with proper headers)
-    const response = await axios.post(
-      `${process.env.EXPO_PUBLIC_ML_API_URL || "http://192.168.18.13:8000"}/analyze-skin`,
+    const res = await axios.post(
+      `${API_URL}/analyze-skin`,
       formData,
       {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-        timeout: 30000, // 30 second timeout
-      },
+        timeout: 30000,
+      }
     );
 
-    // Normalize severities to 1-10 if necessary
-    const payload = response.data;
-    if (payload && payload.success && Array.isArray(payload.data?.conditions)) {
-      const conditions = payload.data.conditions.map((c) => ({ ...c }));
-      const maxSeverity = Math.max(
-        ...conditions.map((c) => c.severity || 0),
-        0,
-      );
-      // If maxSeverity is 0, leave as-is. If <=10, assume already on 1-10 scale.
-      let normalized = conditions;
-      if (maxSeverity > 10) {
-        const factor = 10 / maxSeverity;
-        normalized = conditions.map((c) => ({
-          ...c,
-          severity: Math.max(1, Math.round((c.severity || 0) * factor)),
-        }));
-      } else if (maxSeverity > 0 && maxSeverity < 6) {
-        // scale up small ranges to improve UX (e.g., 1-4 -> 1-10)
-        const factor = 10 / Math.max(maxSeverity, 1);
-        normalized = conditions.map((c) => ({
-          ...c,
-          severity: Math.max(1, Math.round((c.severity || 0) * factor)),
-        }));
-      }
+    return res.data;
 
-      payload.data.conditions = normalized;
-    }
-
-    return payload;
   } catch (error) {
-    console.error("Error analyzing skin image:", error);
+    console.error("Skin analysis error:", error?.response || error);
     throw error;
   }
 };
