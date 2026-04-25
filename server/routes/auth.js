@@ -182,19 +182,22 @@ router.post('/social/facebook', async (req, res) => {
     const axios = require('axios');
     const { data } = await axios.get(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${accessToken}`);
     
-    const { email, name, id: facebookId } = data;
+    const { name, id: facebookId } = data;
+    const email = data.email || null;
     const picture = data.picture?.data?.url;
     
-    if (!email) {
-      return res.status(400).json({ message: 'Facebook email is required but was not provided by user.' });
+    // Try to find user by facebookId first, then by email
+    let user = await User.findOne({ facebookId });
+    
+    if (!user && email) {
+      user = await User.findOne({ email });
     }
     
-    let user = await User.findOne({ email });
-    
     if (!user) {
+      // Create new user — use email if available, otherwise generate a placeholder
       user = new User({
-        name,
-        email,
+        name: name || 'Facebook User',
+        email: email || `fb_${facebookId}@facebook.placeholder`,
         facebookId,
         avatar: picture,
       });

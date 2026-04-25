@@ -57,15 +57,15 @@ const FacialAreasScreen = ({ navigation }) => {
   }, []);
 
   const facialAreas = [
-    { key: 'forehead', label: 'Forehead', emoji: '🔲' },
-    { key: 'nose', label: 'Nose', emoji: '👃' },
-    { key: 'cheeks', label: 'Cheeks', emoji: '😊' },
-    { key: 'chin', label: 'Chin', emoji: '🔽' },
-    { key: 'jawline', label: 'Jawline', emoji: '📐' },
-    { key: 'around-eyes', label: 'Around Eyes', emoji: '👁️' },
-    { key: 'lips', label: 'Lips', emoji: '👄' },
-    { key: 'neck', label: 'Neck', emoji: '🦒' },
-    { key: 'temples', label: 'Temples', emoji: '🔘' },
+    { key: 'forehead', label: 'Forehead', icon: 'border-top' },
+    { key: 'nose', label: 'Nose', icon: 'dots-vertical' },
+    { key: 'cheeks', label: 'Cheeks', icon: 'circle-double' },
+    { key: 'chin', label: 'Chin', icon: 'chevron-down' },
+    { key: 'jawline', label: 'Jawline', icon: 'vector-curve' },
+    { key: 'around-eyes', label: 'Around Eyes', icon: 'eye-outline' },
+    { key: 'lips', label: 'Lips', icon: 'minus' },
+    { key: 'neck', label: 'Neck', icon: 'reorder-horizontal' },
+    { key: 'temples', label: 'Temples', icon: 'adjust' },
   ];
 
   const challenges = [
@@ -184,7 +184,12 @@ const FacialAreasScreen = ({ navigation }) => {
                       <Ionicons name="checkmark" size={10} color="#FFF" />
                     </View>
                   )}
-                  <Text style={styles.areaEmoji}>{area.emoji}</Text>
+                  <MaterialCommunityIcons 
+                    name={area.icon} 
+                    size={28} 
+                    color={isSelected ? '#825A3B' : '#B5A48E'} 
+                    style={{ marginBottom: 6 }}
+                  />
                   <Text
                     style={[
                       styles.areaLabel,

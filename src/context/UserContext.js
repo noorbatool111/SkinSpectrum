@@ -1,5 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { LoginManager } from 'react-native-fbsdk-next';
 import { getProfile, updateProfile as updateProfileApi } from '../services/api';
 
 const UserContext = createContext();
@@ -85,8 +87,18 @@ export const UserProvider = ({ children }) => {
     
     try {
       await SecureStore.deleteItemAsync('userToken');
+      
+      // Clear native social sessions if they exist
+      try {
+        await GoogleSignin.signOut();
+      } catch (ge) { /* ignore if not logged in via google */ }
+      
+      try {
+        LoginManager.logOut();
+      } catch (fe) { /* ignore if not logged in via facebook */ }
+      
     } catch (e) {
-      console.error('Failed to delete token', e);
+      console.error('Failed to logout cleanly:', e);
     }
   };
 

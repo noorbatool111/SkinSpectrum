@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useUser } from '../context/UserContext';
 
 const { width } = Dimensions.get('window');
@@ -71,12 +71,12 @@ const AgeScreen = ({ navigation }) => {
   }, []);
 
   const ageRanges = [
-    { key: 'under-18', label: 'Under 18', emoji: '🧒', desc: 'Teen skin care' },
-    { key: '18-24', label: '18 – 24', emoji: '🧑', desc: 'Young adult' },
-    { key: '25-34', label: '25 – 34', emoji: '👩', desc: 'Prevention focus' },
-    { key: '35-44', label: '35 – 44', emoji: '👨‍💼', desc: 'Early signs' },
-    { key: '45-54', label: '45 – 54', emoji: '🧑‍🦳', desc: 'Active monitoring' },
-    { key: '55+', label: '55+', emoji: '👴', desc: 'Priority screening' },
+    { key: 'under-18', label: 'Under 18', icon: 'baby-face-outline', desc: 'Teen skin care' },
+    { key: '18-24', label: '18 – 24', icon: 'face-man-shimmer', desc: 'Young adult' },
+    { key: '25-34', label: '25 – 34', icon: 'face-woman-shimmer', desc: 'Prevention focus' },
+    { key: '35-44', label: '35 – 44', icon: 'face-man', desc: 'Early signs' },
+    { key: '45-54', label: '45 – 54', icon: 'face-man-profile', desc: 'Active monitoring' },
+    { key: '55+', label: '55+', icon: 'account-supervisor-circle-outline', desc: 'Priority screening' },
   ];
 
   const handleContinue = async () => {
@@ -174,7 +174,11 @@ const AgeScreen = ({ navigation }) => {
                       isSelected && styles.emojiBoxSelected,
                     ]}
                   >
-                    <Text style={styles.emoji}>{range.emoji}</Text>
+                    <MaterialCommunityIcons 
+                      name={range.icon} 
+                      size={24} 
+                      color={isSelected ? '#825A3B' : '#B5A48E'} 
+                    />
                   </View>
 
                   {/* Text */}

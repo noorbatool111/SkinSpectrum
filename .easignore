@@ -1,0 +1,21 @@
+# Ignore node_modules
+node_modules/
+
+# Ignore server folder (EAS only needs the mobile app code)
+server/
+
+# Ignore assets/uploads if any
+uploads/
+.git/
+
+# Ignore build outputs
+android/
+ios/
+dist/
+
+# Ignore env files (EAS handles these differently, but we'll include .env for now if needed)
+# .env
+
+# Ignore temp files
+.expo/
+.npm/

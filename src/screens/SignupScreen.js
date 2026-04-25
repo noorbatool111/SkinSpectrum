@@ -16,14 +16,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons';
-import * as WebBrowser from 'expo-web-browser';
-import * as AuthSession from 'expo-auth-session';
-import * as Google from 'expo-auth-session/providers/google';
-import * as Facebook from 'expo-auth-session/providers/facebook';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
 import { registerUser, googleAuth, facebookAuth } from '../services/api';
 import { useUser } from '../context/UserContext';
 
-WebBrowser.maybeCompleteAuthSession();
+
 
 const { width } = Dimensions.get('window');
 const LOGO_SIZE = 100;
@@ -40,23 +38,77 @@ const SignupScreen = ({ navigation }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // OAuth Google 
-  const [requestGoogle, responseGoogle, promptAsyncGoogle] = Google.useIdTokenAuthRequest({
-    clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
-    // Forces the use of https://auth.expo.io proxy
-    useProxy: true,
-    redirectUri: AuthSession.makeRedirectUri({
-      useProxy: true,
-    }),
-  });
+  // Configure Google Sign-In
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+      offlineAccess: true,
+    });
+  }, []);
 
-  // OAuth Facebook
-  const [requestFacebook, responseFacebook, promptAsyncFacebook] = Facebook.useAuthRequest({
-    clientId: process.env.EXPO_PUBLIC_FACEBOOK_APP_ID,
-  });
+  const handleGoogleSignup = async () => {
+    setLoading(true);
+    setErrorMsg('');
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const idToken = userInfo.data?.idToken;
+
+      if (idToken) {
+        const response = await googleAuth(idToken);
+        await signIn(response.token, response.user);
+        // App.js RootNavigator will automatically switch to Home/Privacy
+      } else {
+        throw new Error('No ID Token received');
+      }
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // progress
+      } else {
+        console.error('Google Native Signup Error:', error);
+        setErrorMsg('Google signup failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Facebook Signup — Native SDK (Works only in Development Builds)
+  const handleFacebookSignup = async () => {
+    setLoading(true);
+    setErrorMsg('');
+    try {
+      // Attempt login with permissions
+      const result = await LoginManager.logInWithPermissions(['public_profile']);
+
+      if (result.isCancelled) {
+        setLoading(false);
+        return;
+      }
+
+      // Get the access token
+      const data = await AccessToken.getCurrentAccessToken();
+      if (!data) {
+        setErrorMsg('Something went wrong obtaining the access token');
+        setLoading(false);
+        return;
+      }
+
+      // Send token to our backend
+      handleSocialSignup('facebook', data.accessToken.toString());
+    } catch (error) {
+      console.error('FB Native Signup Error:', error);
+      setErrorMsg('Facebook sign up failed. Please make sure you are using the Development Build.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     Animated.sequence([
@@ -71,21 +123,7 @@ const SignupScreen = ({ navigation }) => {
     ]).start();
   }, []);
 
-  // Handle Google Response
-  useEffect(() => {
-    if (responseGoogle?.type === 'success') {
-      const { id_token } = responseGoogle.params;
-      handleSocialSignup('google', id_token);
-    }
-  }, [responseGoogle]);
 
-  // Handle Facebook Response
-  useEffect(() => {
-    if (responseFacebook?.type === 'success') {
-      const { access_token } = responseFacebook.authentication;
-      handleSocialSignup('facebook', access_token);
-    }
-  }, [responseFacebook]);
 
   const handleSocialSignup = async (provider, token) => {
     setLoading(true);
@@ -98,7 +136,6 @@ const SignupScreen = ({ navigation }) => {
         data = await facebookAuth(token);
       }
       await signIn(data.token, data.user);
-      // App.js root navigator will automatically switch to Privacy/Home
     } catch (error) {
       setErrorMsg(`${provider} sign up failed. Please try again.`);
     } finally {
@@ -107,8 +144,20 @@ const SignupScreen = ({ navigation }) => {
   };
 
   const handleEmailSignup = async () => {
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !confirmPassword) {
       setErrorMsg('Please fill in all fields');
+      return;
+    }
+
+    // Password Complexity Check
+    const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{12,})/;
+    if (!passwordRegex.test(password)) {
+      setErrorMsg('Password must be at least 12 characters long and contain at least one number and one special character (!@#$%^&*)');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMsg('Passwords do not match');
       return;
     }
     
@@ -116,9 +165,7 @@ const SignupScreen = ({ navigation }) => {
     setErrorMsg('');
     try {
       const data = await registerUser(name, email, password);
-      // Success! Token is saved securely to device
       await signIn(data.token, data.user);
-      // App.js root navigator will automatically switch to Privacy/Home
     } catch (error) {
       setErrorMsg(error.response?.data?.message || 'Something went wrong. Please try again.');
     } finally {
@@ -133,8 +180,8 @@ const SignupScreen = ({ navigation }) => {
       <TouchableOpacity 
         style={[styles.socialButton, styles.googleButton]} 
         activeOpacity={0.85}
-        disabled={!requestGoogle || loading}
-        onPress={() => promptAsyncGoogle()}
+        disabled={loading}
+        onPress={handleGoogleSignup}
       >
         <View style={styles.socialIconBox}>
           <AntDesign name="google" size={20} color="#DB4437" />
@@ -145,8 +192,8 @@ const SignupScreen = ({ navigation }) => {
       <TouchableOpacity 
         style={[styles.socialButton, styles.facebookButton]} 
         activeOpacity={0.85}
-        disabled={!requestFacebook || loading}
-        onPress={() => promptAsyncFacebook()}
+        disabled={loading}
+        onPress={() => handleFacebookSignup()}
       >
         <View style={styles.socialIconBox}>
           <FontAwesome name="facebook" size={20} color="#FFF" />
@@ -210,6 +257,18 @@ const SignupScreen = ({ navigation }) => {
           secureTextEntry
           value={password}
           onChangeText={setPassword}
+        />
+      </View>
+
+      <View style={styles.inputGroup}>
+        <Text style={styles.inputLabel}>Confirm Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="••••••••"
+          placeholderTextColor="#B5A48E"
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
         />
       </View>
 

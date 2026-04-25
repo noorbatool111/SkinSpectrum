@@ -137,7 +137,9 @@ const HomeScreen = ({ navigation }) => {
         >
           <View style={styles.headerLeft}>
             <Text style={styles.greeting}>{greeting()},</Text>
-            <Text style={styles.userName}>{displayName} ✨</Text>
+            <Text style={styles.userName}>
+              {displayName} <Ionicons name="sparkles" size={18} color="#825A3B" />
+            </Text>
           </View>
           <TouchableOpacity
             style={styles.avatarSmall}
