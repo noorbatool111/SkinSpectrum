@@ -1,9 +1,15 @@
+import 'react-native-gesture-handler';
 import React from "react";
 import { View, ActivityIndicator } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { UserProvider, useUser } from "./src/context/UserContext";
+
+// Melanoma Module Contexts
+import { PermissionProvider } from './src/melanoma_module/context/PermissionsContext';
+import { ImageProvider } from './src/melanoma_module/context/ImageContext';
+import { FormProvider } from './src/melanoma_module/context/FormContext';
 
 import WelcomeScreen from "./src/screens/WelcomeScreen";
 import IntroScreen from "./src/screens/IntroScreen";
@@ -19,8 +25,20 @@ import FacialAreasScreen from "./src/screens/FacialAreasScreen";
 import ProfileSetupScreen from "./src/screens/ProfileSetupScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import HomeScreen from "./src/screens/HomeScreen";
+import SkinScanInstructionsScreen from "./src/screens/SkinScanInstructionsScreen";
 import SkinAnalysisCameraScreen from "./src/screens/SkinAnalysisCameraScreen";
 import AnalysisResultsScreen from "./src/screens/AnalysisResultsScreen";
+
+// Melanoma Module Screens
+import MelanomaWelcomeScreen from "./src/melanoma_module/screens/Welcome";
+import AboutMelanomaScreen from "./src/melanoma_module/screens/AboutMelanomaScreen";
+import ScanPhotoScreen from "./src/melanoma_module/screens/ScanPhotoScreen";
+import QuestionnaireScreen from "./src/melanoma_module/screens/QuestionnaireScreen";
+import FormScreen from "./src/melanoma_module/screens/FormScreen";
+import DiagnosisScreen from "./src/melanoma_module/screens/DiagnosisScreen";
+import FullReportScreen from "./src/melanoma_module/screens/FullReportScreen";
+import GrantCameraPermissionScreen from "./src/melanoma_module/screens/GrantCameraPermissionScreen";
+import GrantGalleryPermissionScreen from "./src/melanoma_module/screens/GrantGalleryPermissionScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -113,6 +131,11 @@ const RootNavigator = () => {
           options={{ animation: "slide_from_right" }}
         />
         <Stack.Screen
+          name="SkinScanInstructions"
+          component={SkinScanInstructionsScreen}
+          options={{ animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
           name="SkinAnalysisCamera"
           component={SkinAnalysisCameraScreen}
           options={{ animation: "slide_from_bottom" }}
@@ -122,6 +145,16 @@ const RootNavigator = () => {
           component={AnalysisResultsScreen}
           options={{ animation: "slide_from_bottom" }}
         />
+        {/* Original Melanoma Flow */}
+        <Stack.Screen name="MelanomaWelcome" component={MelanomaWelcomeScreen} />
+        <Stack.Screen name="AboutMelanoma" component={AboutMelanomaScreen} />
+        <Stack.Screen name="ScanPhoto" component={ScanPhotoScreen} />
+        <Stack.Screen name="Questionnaire" component={QuestionnaireScreen} />
+        <Stack.Screen name="FormScreen" component={FormScreen} />
+        <Stack.Screen name="Diagnosis" component={DiagnosisScreen} />
+        <Stack.Screen name="FullReport" component={FullReportScreen} />
+        <Stack.Screen name="GrantCameraPermission" component={GrantCameraPermissionScreen} />
+        <Stack.Screen name="GrantGalleryPermission" component={GrantGalleryPermissionScreen} />
       </Stack.Navigator>
     );
   }
@@ -156,11 +189,17 @@ const RootNavigator = () => {
 export default function App() {
   return (
     <UserProvider>
-      <SafeAreaProvider>
-        <NavigationContainer>
-          <RootNavigator />
-        </NavigationContainer>
-      </SafeAreaProvider>
+      <PermissionProvider>
+        <ImageProvider>
+          <FormProvider>
+            <SafeAreaProvider>
+              <NavigationContainer>
+                <RootNavigator />
+              </NavigationContainer>
+            </SafeAreaProvider>
+          </FormProvider>
+        </ImageProvider>
+      </PermissionProvider>
     </UserProvider>
   );
 }

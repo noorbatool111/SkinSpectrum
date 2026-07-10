@@ -9,6 +9,7 @@ import {
   StatusBar,
   TouchableWithoutFeedback,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 const LOGO_SIZE = width * 0.55;
@@ -119,7 +120,7 @@ const WelcomeScreen = ({ navigation }) => {
           {/* Glow ring behind logo */}
           <Animated.View
             style={[
-              styles.glowRing,
+              styles.glowRingWrapper,
               {
                 opacity: glowOpacity,
                 transform: [
@@ -127,7 +128,14 @@ const WelcomeScreen = ({ navigation }) => {
                 ],
               },
             ]}
-          />
+          >
+            <LinearGradient
+              colors={['rgba(255,126,95,0.15)', 'rgba(254,180,123,0.05)']}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 1}}
+              style={styles.glowRingInner}
+            />
+          </Animated.View>
 
           {/* Logo */}
           <Animated.View
@@ -196,14 +204,14 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: 'rgba(130, 90, 59, 0.04)',
+    backgroundColor: 'rgba(255, 126, 95, 0.05)',
   },
   dotSmall: {
     position: 'absolute',
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: 'rgba(130, 90, 59, 0.06)',
+    backgroundColor: 'rgba(254, 180, 123, 0.08)',
   },
   dotTopLeft: { top: -30, left: -30 },
   dotTopRight: { top: 80, right: -40 },
@@ -216,14 +224,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  glowRing: {
+  glowRingWrapper: {
     position: 'absolute',
-    width: LOGO_SIZE + 60,
-    height: LOGO_SIZE + 60,
-    borderRadius: (LOGO_SIZE + 60) / 2,
+    width: LOGO_SIZE + 80,
+    height: LOGO_SIZE + 80,
+  },
+  glowRingInner: {
+    width: '100%',
+    height: '100%',
+    borderRadius: (LOGO_SIZE + 80) / 2,
     borderWidth: 2,
-    borderColor: 'rgba(130, 90, 59, 0.12)',
-    backgroundColor: 'rgba(130, 90, 59, 0.03)',
+    borderColor: 'rgba(255, 126, 95, 0.2)',
   },
   logoWrapper: {
     width: LOGO_SIZE,
@@ -235,11 +246,12 @@ const styles = StyleSheet.create({
     width: LOGO_SIZE,
     height: LOGO_SIZE,
     borderRadius: LOGO_SIZE / 2,
-    shadowColor: '#825A3B',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
+    shadowColor: '#FF7E5F',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
     shadowRadius: 20,
     elevation: 8,
+    backgroundColor: '#FFF',
   },
   logo: {
     width: '100%',
@@ -252,18 +264,19 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   title: {
-    fontSize: 38,
-    color: '#4A2E12',
+    fontSize: 40,
+    color: '#1D2B64',
     fontFamily: 'serif',
     letterSpacing: 1.5,
     marginBottom: 8,
+    fontWeight: '800',
   },
   tagline: {
-    fontSize: 15,
-    color: '#9B8570',
-    letterSpacing: 2,
+    fontSize: 14,
+    color: '#FF7E5F',
+    letterSpacing: 2.5,
     textTransform: 'uppercase',
-    fontWeight: '500',
+    fontWeight: '700',
   },
 
   // Hint
@@ -275,12 +288,13 @@ const styles = StyleSheet.create({
   hintLine: {
     flex: 1,
     height: 1,
-    backgroundColor: 'rgba(130, 90, 59, 0.15)',
+    backgroundColor: 'rgba(255, 126, 95, 0.2)',
   },
   hintText: {
     fontSize: 13,
-    color: '#B5A18D',
-    letterSpacing: 0.5,
+    color: '#FF7E5F',
+    fontWeight: '600',
+    letterSpacing: 1,
     marginHorizontal: 15,
   },
 });

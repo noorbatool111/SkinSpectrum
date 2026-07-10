@@ -1,0 +1,97 @@
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, View, Platform, Text, Image } from 'react-native';
+import PropTypes from 'prop-types';
+
+import { scale, scaleVertical } from '../../helpers/scale';
+import { useGlobalStyle } from '../../hooks/useGlobalStyle';
+import { colors } from '../../constants/color';
+import { useFonts } from 'expo-font';
+import { Montserrat_400Regular } from '@expo-google-fonts/montserrat';
+
+export const BaseScreen = ({
+  contentStyle,
+  backgroundImage,
+  backgroundColor,
+  children,
+  hasBottomTab = false,
+  fill = false,
+  paddingHorizontal = 32,
+}) => {
+  const basicStyles = useGlobalStyle();
+
+  const [fontsLoaded] = useFonts({
+    Montserrat_400Regular,
+  });
+
+  const BaseComponent = fill ? View : SafeAreaView;
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <BaseComponent
+      style={[
+        basicStyles.CENTER_COL_START,
+        styles.container,
+        {
+          backgroundColor: backgroundColor ? backgroundColor : colors.background,
+        },
+      ]}
+    >
+      {backgroundImage && (
+        <Image
+          source={backgroundImage}
+          resizeMode="cover"
+          style={StyleSheet.absoluteFillObject}
+        />
+      )}
+      <View
+        style={[
+          styles.contentStyle,
+          contentStyle,
+          { paddingHorizontal: scale(paddingHorizontal) },
+          hasBottomTab && {
+            paddingBottom: !fill
+              ? Platform.OS === 'android'
+                ? scaleVertical(82)
+                : scaleVertical(102)
+              : scale(0),
+          },
+        ]}
+      >
+        {children}
+      </View>
+      <StatusBar />
+    </BaseComponent>
+  );
+};
+
+BaseScreen.propTypes = {
+  children: PropTypes.node,
+  contentStyle: PropTypes.object,
+  backgroundImage: PropTypes.object,
+  backgroundColor: PropTypes.string,
+  hasBottomTab: PropTypes.bool,
+  fill: PropTypes.bool,
+  paddingHorizontal: PropTypes.number,
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  contentStyle: {
+    flex: 1,
+    width: '100%',
+  },
+  danger: {
+    paddingHorizontal: scale(24),
+    paddingVertical: scaleVertical(4),
+  },
+});

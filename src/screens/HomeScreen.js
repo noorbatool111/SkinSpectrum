@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -12,13 +12,16 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useUser } from "../context/UserContext";
+import MythOrFactGame from "../components/MythOrFactGame";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 56 - 12) / 2;
 
 const HomeScreen = ({ navigation }) => {
   const { userName, skinType, skinConcerns } = useUser();
+  const [showMythGame, setShowMythGame] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const headerSlide = useRef(new Animated.Value(-20)).current;
@@ -72,28 +75,12 @@ const HomeScreen = ({ navigation }) => {
       bg: "rgba(130, 90, 59, 0.08)",
     },
     {
-      key: "track",
-      label: "Track Progress",
-      desc: "View your journey",
-      icon: "trending-up-outline",
-      color: "#5B8DBE",
-      bg: "rgba(91, 141, 190, 0.08)",
-    },
-    {
-      key: "routine",
-      label: "My Routine",
-      desc: "Daily skincare plan",
-      icon: "calendar-outline",
-      color: "#7B9E6B",
-      bg: "rgba(123, 158, 107, 0.08)",
-    },
-    {
-      key: "learn",
-      label: "Learn",
-      desc: "Skin health tips",
-      icon: "book-outline",
-      color: "#C47B8E",
-      bg: "rgba(196, 123, 142, 0.08)",
+      key: "melanoma",
+      label: "Melanoma",
+      desc: "Mole risk detection",
+      icon: "shield-checkmark-outline",
+      color: "#D32F2F",
+      bg: "rgba(211, 47, 47, 0.08)",
     },
   ];
 
@@ -155,39 +142,46 @@ const HomeScreen = ({ navigation }) => {
         {/* Skin Health Score Card */}
         <Animated.View
           style={[
-            styles.scoreCard,
+            styles.scoreCardContainer,
             {
               opacity: cardsFade,
               transform: [{ translateY: cardsSlide }],
             },
           ]}
         >
-          <View style={styles.scoreLeft}>
-            <Text style={styles.scoreLabel}>Skin Health Score</Text>
-            <View style={styles.scoreRow}>
-              <Text style={styles.scoreNumber}>{skinScore}</Text>
-              <Text style={styles.scoreMax}>/100</Text>
+          <LinearGradient
+            colors={["#FF7E5F", "#FEB47B"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.scoreCardGradient}
+          >
+            <View style={styles.scoreLeft}>
+              <Text style={styles.scoreLabel}>Skin Health Score</Text>
+              <View style={styles.scoreRow}>
+                <Text style={styles.scoreNumber}>{skinScore}</Text>
+                <Text style={styles.scoreMax}>/100</Text>
+              </View>
+              <View style={styles.scoreBar}>
+                <View style={[styles.scoreFill, { width: `${skinScore}%` }]} />
+              </View>
+              <Text style={styles.scoreHint}>
+                {skinScore >= 80
+                  ? "Excellent! Keep it up"
+                  : skinScore >= 60
+                    ? "Good — room to improve"
+                    : "Let's work on this together"}
+              </Text>
             </View>
-            <View style={styles.scoreBar}>
-              <View style={[styles.scoreFill, { width: `${skinScore}%` }]} />
+            <View style={styles.scoreRight}>
+              <View style={styles.scoreCircle}>
+                <MaterialCommunityIcons
+                  name="heart-pulse"
+                  size={32}
+                  color="#FFF"
+                />
+              </View>
             </View>
-            <Text style={styles.scoreHint}>
-              {skinScore >= 80
-                ? "Excellent! Keep it up"
-                : skinScore >= 60
-                  ? "Good — room to improve"
-                  : "Let's work on this together"}
-            </Text>
-          </View>
-          <View style={styles.scoreRight}>
-            <View style={styles.scoreCircle}>
-              <MaterialCommunityIcons
-                name="heart-pulse"
-                size={28}
-                color="#825A3B"
-              />
-            </View>
-          </View>
+          </LinearGradient>
         </Animated.View>
 
         {/* Quick Actions */}
@@ -209,13 +203,9 @@ const HomeScreen = ({ navigation }) => {
                 activeOpacity={0.85}
                 onPress={() => {
                   if (action.key === "scan") {
-                    navigation.navigate("SkinAnalysisCamera");
-                  } else if (action.key === "track") {
-                    // TODO: Navigate to tracking screen
-                  } else if (action.key === "routine") {
-                    // TODO: Navigate to routine screen
-                  } else if (action.key === "learn") {
-                    // TODO: Navigate to learning screen
+                    navigation.navigate("SkinScanInstructions");
+                  } else if (action.key === "melanoma") {
+                    navigation.navigate("MelanomaWelcome");
                   }
                 }}
               >
@@ -233,6 +223,40 @@ const HomeScreen = ({ navigation }) => {
             ))}
           </View>
         </Animated.View>
+
+        {/* Myth or Fact Game Card */}
+        <View style={styles.gameSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Quick Quiz</Text>
+          </View>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => setShowMythGame(true)}
+            style={styles.gameCardWrapper}
+          >
+            <LinearGradient
+              colors={["#A18CD1", "#FBC2EB"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.gameCardGradient}
+            >
+              <View style={styles.gameCardLeft}>
+                <View style={styles.gameIconBox}>
+                  <Text style={{ fontSize: 26 }}>🧠</Text>
+                </View>
+                <View style={styles.gameCardContent}>
+                  <Text style={styles.gameCardTitle}>Myth or Fact?</Text>
+                  <Text style={styles.gameCardDesc}>
+                    Test your skincare knowledge in 5 questions!
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.gamePlayBtn}>
+                <Ionicons name="play" size={16} color="#A18CD1" />
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
 
         {/* Your Profile Tags */}
         {skinType && (
@@ -295,33 +319,47 @@ const HomeScreen = ({ navigation }) => {
           ))}
         </View>
 
+
+
         {/* Bottom Spacer for nav */}
         <View style={{ height: 90 }} />
       </ScrollView>
 
+      {/* Myth or Fact Modal */}
+      <MythOrFactGame
+        visible={showMythGame}
+        onClose={() => setShowMythGame(false)}
+      />
+
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} activeOpacity={0.7}>
+        <TouchableOpacity 
+          style={styles.navItem} 
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate("Home")}
+        >
           <Ionicons name="home" size={24} color="#825A3B" />
           <Text style={[styles.navLabel, styles.navLabelActive]}>Home</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.navItem}
           activeOpacity={0.7}
-          onPress={() => navigation.navigate("SkinAnalysisCamera")}
+          onPress={() => navigation.navigate("SkinScanInstructions")}
         >
           <Ionicons name="scan-outline" size={24} color="#B5A48E" />
-          <Text style={styles.navLabel}>Scan</Text>
+          <Text style={styles.navLabel}>Skin Scan</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navCenterBtn} activeOpacity={0.85}>
-          <View style={styles.navCenterInner}>
-            <Ionicons name="add" size={28} color="#FFF" />
-          </View>
+
+        <TouchableOpacity 
+          style={styles.navItem} 
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate("MelanomaWelcome")}
+        >
+          <Ionicons name="shield-checkmark-outline" size={24} color="#B5A48E" />
+          <Text style={styles.navLabel}>Melanoma Scan</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} activeOpacity={0.7}>
-          <Ionicons name="analytics-outline" size={24} color="#B5A48E" />
-          <Text style={styles.navLabel}>Progress</Text>
-        </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.navItem}
           activeOpacity={0.7}
@@ -386,25 +424,26 @@ const styles = StyleSheet.create({
   },
 
   // Score Card
-  scoreCard: {
+  scoreCardContainer: {
+    marginBottom: 24,
+    shadowColor: "#FF7E5F",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  scoreCardGradient: {
     flexDirection: "row",
-    backgroundColor: "#FFFFFF",
     borderRadius: 24,
     padding: 22,
-    marginBottom: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 4,
   },
   scoreLeft: {
     flex: 1,
   },
   scoreLabel: {
     fontSize: 13,
-    color: "#8A7A64",
-    fontWeight: "600",
+    color: "rgba(255,255,255,0.85)",
+    fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: 0.5,
     marginBottom: 6,
@@ -415,42 +454,42 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   scoreNumber: {
-    fontSize: 42,
-    color: "#4A2E12",
+    fontSize: 46,
+    color: "#FFF",
     fontWeight: "800",
   },
   scoreMax: {
     fontSize: 16,
-    color: "#B5A48E",
+    color: "rgba(255,255,255,0.8)",
     fontWeight: "600",
     marginLeft: 2,
   },
   scoreBar: {
     height: 6,
-    backgroundColor: "rgba(130, 90, 59, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
     borderRadius: 3,
     marginBottom: 8,
     overflow: "hidden",
   },
   scoreFill: {
     height: "100%",
-    backgroundColor: "#825A3B",
+    backgroundColor: "#FFF",
     borderRadius: 3,
   },
   scoreHint: {
-    fontSize: 12,
-    color: "#9B8A76",
-    fontWeight: "500",
+    fontSize: 13,
+    color: "rgba(255,255,255,0.9)",
+    fontWeight: "600",
   },
   scoreRight: {
     justifyContent: "center",
     marginLeft: 16,
   },
   scoreCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "rgba(130, 90, 59, 0.08)",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -483,13 +522,13 @@ const styles = StyleSheet.create({
   actionCard: {
     width: CARD_WIDTH,
     backgroundColor: "#FFFFFF",
-    borderRadius: 18,
+    borderRadius: 20,
     padding: 18,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
   },
   actionIconBox: {
     width: 44,
@@ -576,6 +615,68 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
 
+  // Game Card
+  gameSection: {
+    marginBottom: 10,
+  },
+  gameCardWrapper: {
+    shadowColor: "#A18CD1",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  gameCardGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderRadius: 20,
+    padding: 18,
+  },
+  gameCardLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    gap: 14,
+  },
+  gameIconBox: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  gameCardContent: {
+    flex: 1,
+  },
+  gameCardTitle: {
+    fontSize: 17,
+    color: "#FFF",
+    fontWeight: "800",
+    marginBottom: 4,
+  },
+  gameCardDesc: {
+    fontSize: 13,
+    color: "rgba(255, 255, 255, 0.9)",
+    fontWeight: "600",
+    lineHeight: 18,
+  },
+  gamePlayBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "#FFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+
   // Bottom Nav
   bottomNav: {
     position: "absolute",
@@ -583,7 +684,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     flexDirection: "row",
-    alignItems: "flex-end",
+    alignItems: "center",
     justifyContent: "space-around",
     backgroundColor: "#FFFFFF",
     paddingTop: 10,
@@ -615,15 +716,14 @@ const styles = StyleSheet.create({
     marginTop: -22,
   },
   navCenterInner: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: "#5C3318",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#3A1E0A",
+    shadowColor: "#FF7E5F",
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.4,
     shadowRadius: 12,
     elevation: 8,
   },

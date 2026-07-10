@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+server/node_modules/
 
 # Expo
 .expo/
@@ -31,6 +32,7 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
 
 # typescript
@@ -39,3 +41,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# models
+*.h5

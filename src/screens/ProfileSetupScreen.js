@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useUser } from '../context/UserContext';
 
 const { width } = Dimensions.get('window');
@@ -182,11 +183,15 @@ const ProfileSetupScreen = ({ navigation }) => {
               resizeMode="cover"
             />
           ) : (
-            <View style={styles.avatarPlaceholder}>
+            <LinearGradient
+              colors={['#FF416C', '#FF4B2B']}
+              start={{x:0, y:0}} end={{x:1, y:1}}
+              style={styles.avatarPlaceholder}
+            >
               <Text style={styles.avatarInitial}>
                 {displayName.charAt(0).toUpperCase()}
               </Text>
-            </View>
+            </LinearGradient>
           )}
           <View style={styles.cameraButton}>
             <Ionicons name="camera" size={16} color="#FFF" />
@@ -222,7 +227,7 @@ const ProfileSetupScreen = ({ navigation }) => {
               ]}
             >
               <View style={styles.summaryIconBox}>
-                <Ionicons name={item.icon} size={18} color="#825A3B" />
+                <Ionicons name={item.icon} size={18} color="#FF7E5F" />
               </View>
               <Text style={styles.summaryLabel}>{item.label}</Text>
               <Text style={styles.summaryValue}>{item.value}</Text>
@@ -278,14 +283,20 @@ const ProfileSetupScreen = ({ navigation }) => {
 
         {/* Finish Button */}
         <TouchableOpacity
-          style={styles.finishButton}
+          style={styles.finishButtonWrapper}
           onPress={handleFinish}
           activeOpacity={0.85}
         >
-          <Text style={styles.finishButtonText}>Complete Setup</Text>
-          <View style={styles.finishArrow}>
-            <Ionicons name="checkmark" size={20} color="#FFF" />
-          </View>
+          <LinearGradient
+            colors={['#FF416C', '#FF4B2B']}
+            start={{x:0, y:0}} end={{x:1, y:0}}
+            style={styles.finishButtonGradient}
+          >
+            <Text style={styles.finishButtonText}>Complete Setup</Text>
+            <View style={styles.finishArrow}>
+              <Ionicons name="checkmark" size={20} color="#FFF" />
+            </View>
+          </LinearGradient>
         </TouchableOpacity>
       </Animated.View>
     </SafeAreaView>
@@ -302,7 +313,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: 'rgba(130, 90, 59, 0.03)',
+    backgroundColor: 'rgba(255, 126, 95, 0.05)',
   },
   decorTop: { top: -60, right: -50 },
   decorBottom: { bottom: 100, left: -80 },
@@ -331,17 +342,18 @@ const styles = StyleSheet.create({
   },
   titleSmall: {
     fontSize: 14,
-    color: '#825A3B',
-    fontWeight: '600',
+    color: '#FF7E5F',
+    fontWeight: '800',
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: 4,
   },
   title: {
     fontSize: 28,
-    color: '#4A2E12',
+    color: '#1D2B64',
     fontFamily: 'serif',
     letterSpacing: 0.5,
+    fontWeight: '800',
   },
 
   // Avatar
@@ -362,12 +374,11 @@ const styles = StyleSheet.create({
     width: AVATAR_SIZE,
     height: AVATAR_SIZE,
     borderRadius: AVATAR_SIZE / 2,
-    backgroundColor: '#825A3B',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#825A3B',
+    shadowColor: '#FF416C',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowRadius: 14,
     elevation: 6,
   },
@@ -384,7 +395,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#5C3318',
+    backgroundColor: '#FF416C',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
@@ -392,8 +403,8 @@ const styles = StyleSheet.create({
   },
   avatarName: {
     fontSize: 20,
-    color: '#4A2E12',
-    fontWeight: '700',
+    color: '#1D2B64',
+    fontWeight: '800',
   },
   avatarHint: {
     fontSize: 12,
@@ -423,8 +434,8 @@ const styles = StyleSheet.create({
   // Section label
   sectionLabel: {
     fontSize: 16,
-    color: '#4A2E12',
-    fontWeight: '700',
+    color: '#1D2B64',
+    fontWeight: '800',
     marginBottom: 14,
   },
 
@@ -440,7 +451,7 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 10,
-    backgroundColor: 'rgba(130, 90, 59, 0.08)',
+    backgroundColor: 'rgba(255, 126, 95, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -453,8 +464,8 @@ const styles = StyleSheet.create({
   },
   summaryValue: {
     fontSize: 14,
-    color: '#4A2E12',
-    fontWeight: '700',
+    color: '#1D2B64',
+    fontWeight: '800',
   },
 
   // Tag sections
@@ -463,8 +474,8 @@ const styles = StyleSheet.create({
   },
   tagTitle: {
     fontSize: 14,
-    color: '#4A2E12',
-    fontWeight: '700',
+    color: '#1D2B64',
+    fontWeight: '800',
     marginBottom: 10,
   },
   tagGrid: {
@@ -473,15 +484,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   tag: {
-    backgroundColor: 'rgba(130, 90, 59, 0.08)',
+    backgroundColor: 'rgba(255, 126, 95, 0.1)',
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 14,
   },
   tagText: {
     fontSize: 12,
-    color: '#825A3B',
-    fontWeight: '600',
+    color: '#FF7E5F',
+    fontWeight: '700',
   },
   tagAlt: {
     backgroundColor: 'rgba(91, 141, 190, 0.1)',
@@ -490,32 +501,34 @@ const styles = StyleSheet.create({
     color: '#5B8DBE',
   },
   tagDark: {
-    backgroundColor: '#5C3318',
+    backgroundColor: '#FF416C',
   },
   tagTextDark: {
     color: '#FFF',
+    fontWeight: '700',
   },
 
   // Finish button
-  finishButton: {
-    backgroundColor: '#5C3318',
+  finishButtonWrapper: {
     width: '100%',
-    paddingVertical: 17,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
     marginTop: 14,
-    shadowColor: '#3A1E0A',
+    shadowColor: '#FF416C',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 6,
+  },
+  finishButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 17,
+    borderRadius: 28,
   },
   finishButtonText: {
     color: '#FFF',
     fontSize: 17,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 0.5,
   },
   finishArrow: {

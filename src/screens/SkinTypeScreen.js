@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useUser } from '../context/UserContext';
 
 const { width } = Dimensions.get('window');
@@ -123,7 +124,7 @@ const SkinTypeScreen = ({ navigation }) => {
         ]}
       >
         <View style={styles.iconContainer}>
-          <MaterialCommunityIcons name="face-woman-shimmer" size={34} color="#825A3B" />
+          <MaterialCommunityIcons name="face-woman-shimmer" size={34} color="#FF7E5F" />
         </View>
 
         <Text style={styles.title}>Tell us about{'\n'}your skin</Text>
@@ -178,7 +179,7 @@ const SkinTypeScreen = ({ navigation }) => {
                     <Ionicons
                       name={type.icon}
                       size={24}
-                      color={isSelected ? '#FFF' : '#825A3B'}
+                      color={isSelected ? '#FFF' : '#FF7E5F'}
                     />
                   </View>
                   <Text
@@ -221,7 +222,7 @@ const SkinTypeScreen = ({ navigation }) => {
                   <Ionicons
                     name={isSelected ? 'checkmark-circle' : concern.icon}
                     size={16}
-                    color={isSelected ? '#FFF' : '#825A3B'}
+                    color={isSelected ? '#FFF' : '#FF7E5F'}
                   />
                   <Text
                     style={[
@@ -240,23 +241,31 @@ const SkinTypeScreen = ({ navigation }) => {
         {/* Continue Button */}
         <TouchableOpacity
           style={[
-            styles.continueButton,
-            !isValid && styles.continueButtonDisabled,
+            styles.continueButtonWrapper,
+            !isValid && styles.continueButtonDisabledWrapper,
           ]}
           onPress={handleContinue}
           activeOpacity={0.85}
           disabled={!isValid}
         >
-          <Text style={styles.continueButtonText}>
-            {!selectedType
-              ? 'Select your skin type'
-              : selectedConcerns.length === 0
-              ? 'Select at least one concern'
-              : 'Continue'}
-          </Text>
-          {isValid && (
-            <View style={styles.continueArrow}>
-              <Ionicons name="arrow-forward" size={18} color="#FFF" />
+          {isValid ? (
+            <LinearGradient
+              colors={['#FF416C', '#FF4B2B']}
+              start={{x:0, y:0}} end={{x:1, y:0}}
+              style={styles.continueButtonGradient}
+            >
+              <Text style={styles.continueButtonText}>Continue</Text>
+              <View style={styles.continueArrow}>
+                <Ionicons name="arrow-forward" size={18} color="#FFF" />
+              </View>
+            </LinearGradient>
+          ) : (
+            <View style={styles.continueButtonDisabled}>
+              <Text style={styles.continueButtonText}>
+                {!selectedType
+                  ? 'Select your skin type'
+                  : 'Select at least one concern'}
+              </Text>
             </View>
           )}
         </TouchableOpacity>
@@ -275,7 +284,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: 'rgba(130, 90, 59, 0.03)',
+    backgroundColor: 'rgba(255, 126, 95, 0.05)',
   },
   decorTop: { top: -60, right: -50 },
 
@@ -306,19 +315,20 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 20,
-    backgroundColor: 'rgba(130, 90, 59, 0.08)',
+    backgroundColor: 'rgba(255, 126, 95, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   title: {
-    fontSize: 26,
-    color: '#4A2E12',
+    fontSize: 28,
+    color: '#1D2B64',
     fontFamily: 'serif',
     letterSpacing: 0.5,
     marginBottom: 8,
     textAlign: 'center',
-    lineHeight: 34,
+    lineHeight: 36,
+    fontWeight: '800',
   },
   subtitle: {
     fontSize: 14,
@@ -360,9 +370,9 @@ const styles = StyleSheet.create({
   },
   sectionBadge: {
     fontSize: 12,
-    color: '#825A3B',
-    fontWeight: '600',
-    backgroundColor: 'rgba(130, 90, 59, 0.08)',
+    color: '#FF7E5F',
+    fontWeight: '800',
+    backgroundColor: 'rgba(255, 126, 95, 0.1)',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 10,
@@ -384,20 +394,20 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   typeCardSelected: {
-    borderColor: '#825A3B',
-    backgroundColor: 'rgba(130, 90, 59, 0.04)',
+    borderColor: '#FF7E5F',
+    backgroundColor: 'rgba(255, 126, 95, 0.04)',
   },
   typeIconBox: {
     width: 48,
     height: 48,
     borderRadius: 16,
-    backgroundColor: 'rgba(130, 90, 59, 0.08)',
+    backgroundColor: 'rgba(255, 126, 95, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
   },
   typeIconBoxSelected: {
-    backgroundColor: '#825A3B',
+    backgroundColor: '#FF7E5F',
   },
   typeLabel: {
     fontSize: 14,
@@ -407,7 +417,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   typeLabelSelected: {
-    color: '#825A3B',
+    color: '#FF7E5F',
   },
   typeDesc: {
     fontSize: 11,
@@ -435,8 +445,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   concernChipSelected: {
-    backgroundColor: '#825A3B',
-    borderColor: '#825A3B',
+    backgroundColor: '#FF7E5F',
+    borderColor: '#FF7E5F',
   },
   concernText: {
     fontSize: 13,
@@ -448,30 +458,38 @@ const styles = StyleSheet.create({
   },
 
   // Continue button
-  continueButton: {
-    backgroundColor: '#5C3318',
+  continueButtonWrapper: {
     marginHorizontal: 28,
-    paddingVertical: 17,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
     marginTop: 14,
-    shadowColor: '#3A1E0A',
+    shadowColor: '#FF416C',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.3,
     shadowRadius: 12,
-    elevation: 5,
+    elevation: 6,
   },
-  continueButtonDisabled: {
-    backgroundColor: '#C4B5A5',
+  continueButtonDisabledWrapper: {
     shadowOpacity: 0,
     elevation: 0,
+  },
+  continueButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 17,
+    borderRadius: 28,
+  },
+  continueButtonDisabled: {
+    backgroundColor: '#EAEAEA',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 17,
+    borderRadius: 28,
   },
   continueButtonText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 0.3,
   },
   continueArrow: {

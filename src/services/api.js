@@ -98,4 +98,33 @@ export const analyzeSkinImage = async (imageUri) => {
   }
 };
 
+export const analyzeMelanomaImage = async (imageUri) => {
+  try {
+    const formData = new FormData();
+
+    formData.append("image", {
+      uri: imageUri,
+      type: "image/jpeg",
+      name: "melanoma.jpg",
+    });
+
+    const res = await axios.post(
+      `${API_URL}/melanoma/analyze-melanoma`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        timeout: 30000,
+      }
+    );
+
+    return res.data;
+
+  } catch (error) {
+    console.error("Melanoma analysis error:", error?.response || error);
+    throw error;
+  }
+};
+
 export default api;

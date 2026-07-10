@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
 import { loginUser, googleAuth, facebookAuth } from '../services/api';
@@ -37,6 +38,7 @@ const LoginScreen = ({ navigation }) => {
   const [isEmailView, setIsEmailView] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -197,12 +199,18 @@ const LoginScreen = ({ navigation }) => {
       </View>
 
       <TouchableOpacity 
-        style={styles.emailButton} 
+        style={styles.emailButtonWrapper} 
         activeOpacity={0.85}
         onPress={() => setIsEmailView(true)}
       >
-        <Ionicons name="mail-outline" size={20} color="#5C3318" />
-        <Text style={styles.emailButtonText}>Login with Email</Text>
+        <LinearGradient
+          colors={['#FF7E5F', '#FEB47B']}
+          start={{x:0, y:0}} end={{x:1, y:0}}
+          style={styles.emailButtonGradient}
+        >
+          <Ionicons name="mail-outline" size={20} color="#FFF" />
+          <Text style={styles.emailButtonText}>Login with Email</Text>
+        </LinearGradient>
       </TouchableOpacity>
 
       {loading && <ActivityIndicator color="#5C3318" style={{ marginTop: 20 }} />}
@@ -228,26 +236,45 @@ const LoginScreen = ({ navigation }) => {
 
       <View style={styles.inputGroup}>
         <Text style={styles.inputLabel}>Password</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="••••••••"
-          placeholderTextColor="#B5A48E"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        <View style={styles.passwordInputWrapper}>
+          <TextInput
+            style={styles.innerInput}
+            placeholder="••••••••"
+            placeholderTextColor="#B5A48E"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity 
+            style={styles.eyeIcon} 
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <Ionicons 
+              name={showPassword ? "eye-off-outline" : "eye-outline"} 
+              size={22} 
+              color="#B5A48E" 
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <TouchableOpacity 
-        style={styles.submitButton} 
+        style={styles.submitButtonWrapper} 
         onPress={handleEmailLogin}
         disabled={loading}
+        activeOpacity={0.85}
       >
-        {loading ? (
-          <ActivityIndicator color="#FFF" />
-        ) : (
-          <Text style={styles.submitButtonText}>Log In</Text>
-        )}
+        <LinearGradient
+          colors={['#FF416C', '#FF4B2B']}
+          start={{x:0, y:0}} end={{x:1, y:0}}
+          style={styles.submitButtonGradient}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFF" />
+          ) : (
+            <Text style={styles.submitButtonText}>Log In</Text>
+          )}
+        </LinearGradient>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => setIsEmailView(false)} style={styles.backToSocial}>
@@ -302,25 +329,25 @@ const LoginScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FAF6EF' },
-  decorCircle: { position: 'absolute', width: 250, height: 250, borderRadius: 125, backgroundColor: 'rgba(130, 90, 59, 0.03)' },
+  decorCircle: { position: 'absolute', width: 250, height: 250, borderRadius: 125, backgroundColor: 'rgba(255, 126, 95, 0.05)' },
   decorTop: { top: -80, right: -60 },
   backButton: { position: 'absolute', top: 55, left: 20, zIndex: 10 },
-  backButtonInner: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(130, 90, 59, 0.08)', alignItems: 'center', justifyContent: 'center' },
+  backButtonInner: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 },
   headerSection: { alignItems: 'center', justifyContent: 'center', paddingTop: 60, paddingBottom: 20 },
-  logoContainer: { width: LOGO_SIZE, height: LOGO_SIZE, borderRadius: LOGO_SIZE / 2, shadowColor: '#825A3B', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12, elevation: 4, marginBottom: 14 },
+  logoContainer: { width: LOGO_SIZE, height: LOGO_SIZE, borderRadius: LOGO_SIZE / 2, shadowColor: '#FF7E5F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 12, elevation: 4, marginBottom: 14, backgroundColor: '#FFF' },
   logoImage: { width: LOGO_SIZE, height: LOGO_SIZE },
-  appName: { fontSize: 28, color: '#4A2E12', fontFamily: 'serif', letterSpacing: 1 },
-  bottomCard: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 32, borderTopRightRadius: 32, paddingHorizontal: 28, paddingTop: 35, paddingBottom: 45, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.06, shadowRadius: 16, elevation: 8, minHeight: 450 },
-  cardTitle: { fontSize: 26, color: '#3E2210', fontWeight: '700', textAlign: 'center', marginBottom: 6 },
-  cardSubtitle: { fontSize: 14, color: '#9B8A76', textAlign: 'center', marginBottom: 28 },
+  appName: { fontSize: 28, color: '#1D2B64', fontFamily: 'serif', letterSpacing: 1, fontWeight: '800' },
+  bottomCard: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 36, borderTopRightRadius: 36, paddingHorizontal: 28, paddingTop: 35, paddingBottom: 45, shadowColor: '#000', shadowOffset: { width: 0, height: -6 }, shadowOpacity: 0.08, shadowRadius: 20, elevation: 8, minHeight: 450 },
+  cardTitle: { fontSize: 26, color: '#1D2B64', fontWeight: '800', textAlign: 'center', marginBottom: 6 },
+  cardSubtitle: { fontSize: 14, color: '#888', textAlign: 'center', marginBottom: 28 },
   
   // Social buttons
   socialButton: { flexDirection: 'row', alignItems: 'center', width: '100%', paddingVertical: 14, borderRadius: 14, marginBottom: 12, paddingHorizontal: 16 },
   socialIconBox: { width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
   socialText: { flex: 1, textAlign: 'center', fontSize: 15, fontWeight: '600', marginRight: 36 },
-  googleButton: { backgroundColor: '#FFF', borderWidth: 1, borderColor: '#EDEDED' },
-  googleText: { color: '#4A3A28' },
-  facebookButton: { backgroundColor: '#6B4830' },
+  googleButton: { backgroundColor: '#FFF', borderWidth: 1, borderColor: '#F0F0F0', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
+  googleText: { color: '#333' },
+  facebookButton: { backgroundColor: '#1877F2' },
   facebookText: { color: '#FFF' },
   
   // Divider
@@ -329,23 +356,35 @@ const styles = StyleSheet.create({
   dividerText: { marginHorizontal: 14, fontSize: 13, color: '#B5A48E', fontWeight: '500' },
   
   // Email button
-  emailButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', paddingVertical: 15, borderRadius: 14, borderWidth: 1.5, borderColor: '#5C3318', gap: 8 },
-  emailButtonText: { fontSize: 15, color: '#5C3318', fontWeight: '600' },
+  emailButtonWrapper: { width: '100%', shadowColor: '#FF7E5F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
+  emailButtonGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', paddingVertical: 16, borderRadius: 16, gap: 8 },
+  emailButtonText: { fontSize: 16, color: '#FFF', fontWeight: '700' },
   
   // Form Styles
   formContainer: { width: '100%' },
   errorText: { color: '#E74C3C', textAlign: 'center', marginBottom: 15, fontSize: 14 },
   inputGroup: { marginBottom: 16 },
-  inputLabel: { fontSize: 13, color: '#5C3D1A', marginBottom: 6, fontWeight: '600' },
-  input: { backgroundColor: '#F9F7F4', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, fontSize: 15, color: '#3E2210', borderWidth: 1, borderColor: '#E8E2D9' },
-  submitButton: { backgroundColor: '#5C3318', borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 10 },
-  submitButtonText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
-  backToSocial: { alignItems: 'center', marginTop: 16 },
-  backToSocialText: { color: '#8A7A64', fontSize: 14, fontWeight: '600' },
+  inputLabel: { fontSize: 14, color: '#1D2B64', marginBottom: 8, fontWeight: '700' },
+  passwordInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,126,95,0.03)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,126,95,0.2)',
+  },
+  input: { backgroundColor: 'rgba(255,126,95,0.03)', borderRadius: 16, paddingHorizontal: 16, paddingVertical: 16, fontSize: 16, color: '#333', borderWidth: 1, borderColor: 'rgba(255,126,95,0.2)' },
+  innerInput: { flex: 1, paddingHorizontal: 16, paddingVertical: 16, fontSize: 16, color: '#333' },
+  eyeIcon: { paddingHorizontal: 16 },
+  submitButtonWrapper: { marginTop: 10, shadowColor: '#FF416C', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 6 },
+  submitButtonGradient: { borderRadius: 16, paddingVertical: 18, alignItems: 'center' },
+  submitButtonText: { color: '#FFF', fontSize: 18, fontWeight: '800' },
+  backToSocial: { alignItems: 'center', marginTop: 20 },
+  backToSocialText: { color: '#888', fontSize: 14, fontWeight: '600' },
 
-  signInRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
-  signInText: { color: '#8A7A64', fontSize: 14 },
-  signInLink: { color: '#5C3318', fontSize: 14, fontWeight: '700' }
+  signInRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 28 },
+  signInText: { color: '#888', fontSize: 15 },
+  signInLink: { color: '#FF416C', fontSize: 15, fontWeight: '800' }
 });
 
 export default LoginScreen;

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useUser } from '../context/UserContext';
 
 const { width } = Dimensions.get('window');
@@ -163,7 +164,7 @@ const GenderScreen = ({ navigation }) => {
         ]}
       >
         <View style={styles.iconContainer}>
-          <Ionicons name="people" size={34} color="#825A3B" />
+          <Ionicons name="people" size={34} color="#FF7E5F" />
         </View>
 
         <Text style={styles.title}>
@@ -289,19 +290,27 @@ const GenderScreen = ({ navigation }) => {
         {/* Continue Button */}
         <TouchableOpacity
           style={[
-            styles.continueButton,
-            !selected && styles.continueButtonDisabled,
+            styles.continueButtonWrapper,
+            !selected && styles.continueButtonDisabledWrapper,
           ]}
           onPress={handleContinue}
           activeOpacity={0.85}
           disabled={!selected}
         >
-          <Text style={styles.continueButtonText}>
-            {selected ? 'Continue' : 'Select an option'}
-          </Text>
-          {selected && (
-            <View style={styles.continueArrow}>
-              <Ionicons name="arrow-forward" size={18} color="#FFF" />
+          {selected ? (
+            <LinearGradient
+              colors={['#FF416C', '#FF4B2B']}
+              start={{x:0, y:0}} end={{x:1, y:0}}
+              style={styles.continueButtonGradient}
+            >
+              <Text style={styles.continueButtonText}>Continue</Text>
+              <View style={styles.continueArrow}>
+                <Ionicons name="arrow-forward" size={18} color="#FFF" />
+              </View>
+            </LinearGradient>
+          ) : (
+            <View style={styles.continueButtonDisabled}>
+              <Text style={styles.continueButtonText}>Select an option</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -322,7 +331,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: 'rgba(130, 90, 59, 0.03)',
+    backgroundColor: 'rgba(255, 126, 95, 0.05)',
   },
   decorTop: { top: -60, right: -50 },
   decorBottom: { bottom: 100, left: -80 },
@@ -354,19 +363,20 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 20,
-    backgroundColor: 'rgba(130, 90, 59, 0.08)',
+    backgroundColor: 'rgba(255, 126, 95, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   title: {
-    fontSize: 26,
-    color: '#4A2E12',
+    fontSize: 28,
+    color: '#1D2B64',
     fontFamily: 'serif',
     letterSpacing: 0.5,
     marginBottom: 8,
     textAlign: 'center',
-    lineHeight: 34,
+    lineHeight: 36,
+    fontWeight: '800',
   },
   subtitle: {
     fontSize: 14,
@@ -465,29 +475,37 @@ const styles = StyleSheet.create({
   },
 
   // Continue button
-  continueButton: {
-    backgroundColor: '#5C3318',
+  continueButtonWrapper: {
     width: '100%',
-    paddingVertical: 17,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    shadowColor: '#3A1E0A',
+    shadowColor: '#FF416C',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.3,
     shadowRadius: 12,
-    elevation: 5,
+    elevation: 6,
   },
-  continueButtonDisabled: {
-    backgroundColor: '#C4B5A5',
+  continueButtonDisabledWrapper: {
     shadowOpacity: 0,
     elevation: 0,
+  },
+  continueButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 17,
+    borderRadius: 28,
+  },
+  continueButtonDisabled: {
+    backgroundColor: '#EAEAEA',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 17,
+    borderRadius: 28,
   },
   continueButtonText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 0.3,
   },
   continueArrow: {

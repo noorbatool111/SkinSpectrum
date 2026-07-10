@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useUser } from '../context/UserContext';
 
 const { width } = Dimensions.get('window');
@@ -113,7 +114,7 @@ const NameScreen = ({ navigation }) => {
         >
           {/* Greeting icon */}
           <View style={styles.iconContainer}>
-            <Ionicons name="hand-left" size={34} color="#825A3B" />
+            <Ionicons name="hand-left" size={34} color="#FF7E5F" />
           </View>
 
           <Text style={styles.title}>What should we{'\n'}call you?</Text>
@@ -167,7 +168,7 @@ const NameScreen = ({ navigation }) => {
                 <Ionicons
                   name="person-outline"
                   size={20}
-                  color={isFocused ? '#825A3B' : '#B5A48E'}
+                  color={isFocused ? '#FF7E5F' : '#B5A48E'}
                 />
               </View>
               <TextInput
@@ -205,19 +206,27 @@ const NameScreen = ({ navigation }) => {
           {/* Continue Button */}
           <TouchableOpacity
             style={[
-              styles.continueButton,
-              !isValid && styles.continueButtonDisabled,
+              styles.continueButtonWrapper,
+              !isValid && styles.continueButtonDisabledWrapper,
             ]}
             onPress={handleContinue}
             activeOpacity={0.85}
             disabled={!isValid}
           >
-            <Text style={styles.continueButtonText}>
-              {isValid ? 'Continue' : 'Enter your name'}
-            </Text>
-            {isValid && (
-              <View style={styles.continueArrow}>
-                <Ionicons name="arrow-forward" size={18} color="#FFF" />
+            {isValid ? (
+              <LinearGradient
+                colors={['#FF416C', '#FF4B2B']}
+                start={{x:0, y:0}} end={{x:1, y:0}}
+                style={styles.continueButtonGradient}
+              >
+                <Text style={styles.continueButtonText}>Continue</Text>
+                <View style={styles.continueArrow}>
+                  <Ionicons name="arrow-forward" size={18} color="#FFF" />
+                </View>
+              </LinearGradient>
+            ) : (
+              <View style={styles.continueButtonDisabled}>
+                <Text style={styles.continueButtonText}>Enter your name</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -251,7 +260,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: 'rgba(130, 90, 59, 0.03)',
+    backgroundColor: 'rgba(255, 126, 95, 0.05)',
   },
   decorTop: { top: -50, left: -70 },
   decorBottom: { bottom: 60, right: -60 },
@@ -283,19 +292,20 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 20,
-    backgroundColor: 'rgba(130, 90, 59, 0.08)',
+    backgroundColor: 'rgba(255, 126, 95, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   title: {
     fontSize: 28,
-    color: '#4A2E12',
+    color: '#1D2B64',
     fontFamily: 'serif',
     letterSpacing: 0.5,
     marginBottom: 8,
     textAlign: 'center',
     lineHeight: 36,
+    fontWeight: '800',
   },
   subtitle: {
     fontSize: 14,
@@ -327,8 +337,8 @@ const styles = StyleSheet.create({
   },
   previewLabel: {
     fontSize: 24,
-    color: '#4A2E12',
-    fontWeight: '700',
+    color: '#1D2B64',
+    fontWeight: '800',
     textAlign: 'center',
   },
   previewSubtext: {
@@ -352,17 +362,17 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   inputContainerFocused: {
-    borderColor: '#D4B896',
-    backgroundColor: '#FFF',
+    borderColor: '#FF7E5F',
+    backgroundColor: 'rgba(255, 126, 95, 0.03)',
   },
   inputContainerValid: {
-    borderColor: '#825A3B',
+    borderColor: '#FF7E5F',
   },
   inputIconBox: {
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: 'rgba(130, 90, 59, 0.08)',
+    backgroundColor: 'rgba(255, 126, 95, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -378,7 +388,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#825A3B',
+    backgroundColor: '#FF7E5F',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -390,29 +400,37 @@ const styles = StyleSheet.create({
   },
 
   // Continue button
-  continueButton: {
-    backgroundColor: '#5C3318',
+  continueButtonWrapper: {
     width: '100%',
-    paddingVertical: 17,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    shadowColor: '#3A1E0A',
+    shadowColor: '#FF416C',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.3,
     shadowRadius: 12,
-    elevation: 5,
+    elevation: 6,
   },
-  continueButtonDisabled: {
-    backgroundColor: '#C4B5A5',
+  continueButtonDisabledWrapper: {
     shadowOpacity: 0,
     elevation: 0,
+  },
+  continueButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 17,
+    borderRadius: 28,
+  },
+  continueButtonDisabled: {
+    backgroundColor: '#EAEAEA',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 17,
+    borderRadius: 28,
   },
   continueButtonText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 0.3,
   },
   continueArrow: {

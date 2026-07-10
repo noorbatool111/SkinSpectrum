@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 const LOGO_SIZE = 80;
@@ -96,7 +97,7 @@ const PrivacyScreen = ({ navigation }) => {
       >
         {/* Shield icon */}
         <View style={styles.shieldContainer}>
-          <Ionicons name="shield-checkmark" size={36} color="#825A3B" />
+          <Ionicons name="shield-checkmark" size={36} color="#FF7E5F" />
         </View>
 
         <Text style={styles.title}>Privacy first</Text>
@@ -107,7 +108,9 @@ const PrivacyScreen = ({ navigation }) => {
         {/* Progress indicator */}
         <View style={styles.progressRow}>
           <View style={styles.progressTrack}>
-            <View
+            <LinearGradient
+              colors={['#FF7E5F', '#FEB47B']}
+              start={{x:0, y:0}} end={{x:1, y:0}}
               style={[
                 styles.progressFill,
                 { width: `${(progressCount / 2) * 100}%` },
@@ -140,7 +143,7 @@ const PrivacyScreen = ({ navigation }) => {
           >
             <View style={styles.consentHeader}>
               <View style={styles.consentIconBox}>
-                <Ionicons name="body-outline" size={18} color="#825A3B" />
+                <Ionicons name="body-outline" size={18} color="#FF7E5F" />
               </View>
               <Text style={styles.consentLabel}>Skin & Health Data</Text>
               <View
@@ -173,7 +176,7 @@ const PrivacyScreen = ({ navigation }) => {
           >
             <View style={styles.consentHeader}>
               <View style={styles.consentIconBox}>
-                <Ionicons name="camera-outline" size={18} color="#825A3B" />
+                <Ionicons name="camera-outline" size={18} color="#FF7E5F" />
               </View>
               <Text style={styles.consentLabel}>Facial Image Analysis</Text>
               <View
@@ -204,24 +207,32 @@ const PrivacyScreen = ({ navigation }) => {
               onPress={handleAcceptAll}
               activeOpacity={0.7}
             >
-              <Ionicons name="checkmark-done" size={18} color="#825A3B" />
+              <Ionicons name="checkmark-done" size={18} color="#FF7E5F" />
               <Text style={styles.acceptAllText}>Accept all</Text>
             </TouchableOpacity>
           )}
 
           {/* Next Button */}
           <TouchableOpacity
-            style={[styles.nextButton, !allAccepted && styles.nextButtonDisabled]}
+            style={[styles.nextButtonWrapper, !allAccepted && styles.nextButtonDisabledWrapper]}
             onPress={handleNext}
             activeOpacity={0.85}
             disabled={!allAccepted}
           >
-            <Text style={styles.nextButtonText}>
-              {allAccepted ? 'Continue' : 'Please accept to continue'}
-            </Text>
-            {allAccepted && (
-              <View style={styles.nextArrow}>
-                <Ionicons name="arrow-forward" size={18} color="#FFF" />
+            {allAccepted ? (
+              <LinearGradient
+                colors={['#FF416C', '#FF4B2B']}
+                start={{x:0, y:0}} end={{x:1, y:0}}
+                style={styles.nextButtonGradient}
+              >
+                <Text style={styles.nextButtonText}>Continue</Text>
+                <View style={styles.nextArrow}>
+                  <Ionicons name="arrow-forward" size={18} color="#FFF" />
+                </View>
+              </LinearGradient>
+            ) : (
+              <View style={styles.nextButtonDisabled}>
+                <Text style={styles.nextButtonText}>Please accept to continue</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -243,7 +254,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: 'rgba(130, 90, 59, 0.03)',
+    backgroundColor: 'rgba(255, 126, 95, 0.05)',
   },
   decorTop: { top: -60, left: -60 },
 
@@ -274,7 +285,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 20,
-    backgroundColor: 'rgba(130, 90, 59, 0.08)',
+    backgroundColor: 'rgba(255, 126, 95, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -303,20 +314,19 @@ const styles = StyleSheet.create({
   },
   progressTrack: {
     flex: 1,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(130, 90, 59, 0.1)',
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 126, 95, 0.1)',
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#825A3B',
-    borderRadius: 2,
+    borderRadius: 3,
   },
   progressText: {
     fontSize: 12,
-    color: '#825A3B',
-    fontWeight: '700',
+    color: '#FF7E5F',
+    fontWeight: '800',
   },
 
   // Bottom Card
@@ -349,8 +359,8 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   consentCardActive: {
-    borderColor: '#825A3B',
-    backgroundColor: 'rgba(130, 90, 59, 0.04)',
+    borderColor: '#FF7E5F',
+    backgroundColor: 'rgba(255, 126, 95, 0.04)',
   },
   consentHeader: {
     flexDirection: 'row',
@@ -361,7 +371,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: 'rgba(130, 90, 59, 0.1)',
+    backgroundColor: 'rgba(255, 126, 95, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
@@ -383,7 +393,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   toggleActive: {
-    backgroundColor: '#825A3B',
+    backgroundColor: '#FF7E5F',
   },
   toggleKnob: {
     width: 20,
@@ -416,35 +426,43 @@ const styles = StyleSheet.create({
   },
   acceptAllText: {
     fontSize: 15,
-    color: '#825A3B',
-    fontWeight: '700',
+    color: '#FF7E5F',
+    fontWeight: '800',
   },
 
   // Next button
-  nextButton: {
-    backgroundColor: '#5C3318',
+  nextButtonWrapper: {
     width: '100%',
-    paddingVertical: 17,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
     marginTop: 10,
-    shadowColor: '#3A1E0A',
+    shadowColor: '#FF416C',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.3,
     shadowRadius: 12,
-    elevation: 5,
+    elevation: 6,
   },
-  nextButtonDisabled: {
-    backgroundColor: '#C4B5A5',
+  nextButtonDisabledWrapper: {
     shadowOpacity: 0,
     elevation: 0,
+  },
+  nextButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 17,
+    borderRadius: 28,
+  },
+  nextButtonDisabled: {
+    backgroundColor: '#EAEAEA',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 17,
+    borderRadius: 28,
   },
   nextButtonText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 0.3,
   },
   nextArrow: {

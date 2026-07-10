@@ -5,7 +5,8 @@ const dotenv = require('dotenv');
 
 // Routes
 const authRoutes = require('./routes/auth');
-const analyzeRoute = require('./routes/analyzeSkin'); // ✅ NEW
+const analyzeRoute = require('./routes/analyzeSkin');
+const melanomaRoute = require('./routes/melanoma'); // ✅ NEW
 
 dotenv.config();
 
@@ -27,7 +28,8 @@ app.use((req, res, next) => {
 // ROUTES
 // -------------------------
 app.use('/api/auth', authRoutes);
-app.use('/api', analyzeRoute); // ✅ NEW (Python ML route)
+app.use('/api', analyzeRoute);
+app.use('/api/melanoma', melanomaRoute); // ✅ NEW
 
 // Root route
 app.get('/', (req, res) => {

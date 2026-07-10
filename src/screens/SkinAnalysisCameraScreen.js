@@ -10,12 +10,10 @@ import {
   Platform,
   StatusBar,
 } from "react-native";
-import * as CameraModule from "expo-camera";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { analyzeSkinImage } from "../services/api";
-
-const Camera = CameraModule.CameraView;
 
 const { width, height } = Dimensions.get("window");
 const TOP_OFFSET =
@@ -27,54 +25,50 @@ const SkinAnalysisCameraScreen = ({ navigation }) => {
   const [cameraReady, setCameraReady] = useState(false);
   const [cameraType, setCameraType] = useState("front");
   const [flash, setFlash] = useState("off");
+  const [permission, requestPermission] = useCameraPermissions();
 
-  // Permissions
   useEffect(() => {
     const requestPermissions = async () => {
-      const cameraStatus = await CameraModule.requestCameraPermissionsAsync();
+      const cameraStatus = await requestPermission();
       const photoStatus =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (cameraStatus.status !== "granted") {
-        Alert.alert("Camera Permission Required");
+        Alert.alert("Permission Required", "Camera permission is needed to scan your face.");
       }
       if (photoStatus.status !== "granted") {
-        Alert.alert("Gallery Permission Required");
+        Alert.alert("Permission Required", "Gallery permission is needed to upload images.");
       }
     };
-
     requestPermissions();
   }, []);
 
-  // 📸 TAKE PICTURE
   const takePicture = async () => {
     if (!cameraReady || !cameraRef.current) {
-      Alert.alert("Camera not ready");
+      Alert.alert("Error", "Camera not ready");
       return;
     }
 
     try {
       setIsLoading(true);
-
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.9,
       });
-
       await uploadAndAnalyze(photo.uri);
     } catch (error) {
       console.log(error);
-      Alert.alert("Error capturing image");
+      Alert.alert("Error", "Error capturing image");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 🖼️ PICK IMAGE
   const pickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
         allowsEditing: true,
+        aspect: [1, 1],
         quality: 0.9,
       });
 
@@ -82,11 +76,10 @@ const SkinAnalysisCameraScreen = ({ navigation }) => {
         await uploadAndAnalyze(result.assets[0].uri);
       }
     } catch (error) {
-      Alert.alert("Error picking image");
+      Alert.alert("Error", "Error picking image");
     }
   };
 
-  // 🔥 FIXED FUNCTION (IMPORTANT)
   const uploadAndAnalyze = async (imageUri) => {
     try {
       setIsLoading(true);
@@ -95,17 +88,21 @@ const SkinAnalysisCameraScreen = ({ navigation }) => {
 
       console.log("API RESULT:", analysisResult);
 
-      // ✅ DIRECT NAVIGATION (FIXED)
       navigation.navigate("AnalysisResults", {
         results: analysisResult,
       });
     } catch (error) {
       console.log("ERROR:", error?.response || error);
 
-      Alert.alert(
-        "Analysis Failed",
-        "Could not analyze image. Make sure servers are running."
-      );
+      const errorData = error?.response?.data;
+      if (errorData && errorData.error === 'NO_FACE') {
+        Alert.alert("No Face Detected", errorData.message || "Please take the picture again.");
+      } else {
+        Alert.alert(
+          "Analysis Failed",
+          "Could not analyze image. Make sure your face is visible and well-lit."
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -113,7 +110,7 @@ const SkinAnalysisCameraScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Camera
+      <CameraView
         ref={cameraRef}
         style={styles.camera}
         facing={cameraType}
@@ -127,17 +124,22 @@ const SkinAnalysisCameraScreen = ({ navigation }) => {
           <Ionicons name="chevron-back" size={24} color="#FFF" />
         </TouchableOpacity>
         <Text style={styles.headerText}>Capture Face</Text>
-        <View style={{ width: 24 }} />
+        <TouchableOpacity onPress={() => setCameraType(cameraType === 'front' ? 'back' : 'front')}>
+          <Ionicons name="camera-reverse-outline" size={24} color="#FFF" />
+        </TouchableOpacity>
       </View>
 
-      {/* GUIDE */}
-      <View style={styles.center}>
-        <Text style={{ color: "#FFF" }}>Align your face properly</Text>
+      {/* GUIDE OVERLAY */}
+      <View style={styles.overlay}>
+        <View style={styles.guideContainer}>
+          <View style={styles.guideBox} />
+          <Text style={styles.guideText}>Align your face in the frame</Text>
+        </View>
       </View>
 
       {/* CONTROLS */}
       <View style={styles.bottom}>
-        <TouchableOpacity onPress={pickImage}>
+        <TouchableOpacity onPress={pickImage} style={styles.iconBtn}>
           <Ionicons name="image-outline" size={28} color="#FFF" />
         </TouchableOpacity>
 
@@ -147,16 +149,15 @@ const SkinAnalysisCameraScreen = ({ navigation }) => {
           disabled={isLoading}
         >
           {isLoading ? (
-            <ActivityIndicator color="#000" />
+            <ActivityIndicator color="#825A3B" />
           ) : (
             <View style={styles.inner} />
           )}
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() =>
-            setFlash(flash === "off" ? "on" : "off")
-          }
+          onPress={() => setFlash(flash === "off" ? "on" : "off")}
+          style={styles.iconBtn}
         >
           <Ionicons
             name={flash === "off" ? "flash-off" : "flash"}
@@ -169,8 +170,8 @@ const SkinAnalysisCameraScreen = ({ navigation }) => {
       {isLoading && (
         <View style={styles.loading}>
           <ActivityIndicator size="large" color="#FFF" />
-          <Text style={{ color: "#FFF", marginTop: 10 }}>
-            Analyzing...
+          <Text style={{ color: "#FFF", marginTop: 15, fontWeight: '600' }}>
+            Analyzing your skin...
           </Text>
         </View>
       )}
@@ -180,68 +181,88 @@ const SkinAnalysisCameraScreen = ({ navigation }) => {
 
 export default SkinAnalysisCameraScreen;
 
-// ---------------- STYLES ----------------
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
-
-  camera: {
-    ...StyleSheet.absoluteFillObject,
-  },
-
+  camera: { ...StyleSheet.absoluteFillObject },
   header: {
     position: "absolute",
     top: 0,
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 16,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    zIndex: 10,
   },
-
-  headerText: {
-    color: "#FFF",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-
-  center: {
+  headerText: { color: "#FFF", fontSize: 18, fontWeight: "700" },
+  overlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: 'transparent',
   },
-
+  guideContainer: {
+    alignItems: 'center',
+  },
+  guideBox: {
+    width: width * 0.65,
+    height: width * 0.85,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.8)',
+    borderRadius: width * 0.35,
+    borderStyle: 'dashed',
+  },
+  guideText: {
+    color: "#FFF",
+    marginTop: 20,
+    fontSize: 16,
+    fontWeight: '500',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
   bottom: {
     position: "absolute",
-    bottom: 40,
+    bottom: 50,
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
   },
-
   capture: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: "#FFF",
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "rgba(255,255,255,0.3)",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 4,
+    borderColor: '#FFF',
   },
-
   inner: {
-    width: 55,
-    height: 55,
-    borderRadius: 28,
-    backgroundColor: "#000",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#FFF",
   },
-
+  iconBtn: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   loading: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.7)",
+    backgroundColor: "rgba(0,0,0,0.8)",
     justifyContent: "center",
     alignItems: "center",
   },

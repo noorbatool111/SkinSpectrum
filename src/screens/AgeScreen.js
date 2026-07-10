@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useUser } from '../context/UserContext';
 
 const { width } = Dimensions.get('window');
@@ -118,7 +119,7 @@ const AgeScreen = ({ navigation }) => {
         ]}
       >
         <View style={styles.iconContainer}>
-          <Ionicons name="calendar" size={34} color="#825A3B" />
+          <Ionicons name="calendar" size={34} color="#FF7E5F" />
         </View>
 
         <Text style={styles.title}>How old are you,{'\n'}{displayName}?</Text>
@@ -177,7 +178,7 @@ const AgeScreen = ({ navigation }) => {
                     <MaterialCommunityIcons 
                       name={range.icon} 
                       size={24} 
-                      color={isSelected ? '#825A3B' : '#B5A48E'} 
+                      color={isSelected ? '#FF7E5F' : '#B5A48E'} 
                     />
                   </View>
 
@@ -224,19 +225,27 @@ const AgeScreen = ({ navigation }) => {
         {/* Continue Button */}
         <TouchableOpacity
           style={[
-            styles.continueButton,
-            !selected && styles.continueButtonDisabled,
+            styles.continueButtonWrapper,
+            !selected && styles.continueButtonDisabledWrapper,
           ]}
           onPress={handleContinue}
           activeOpacity={0.85}
           disabled={!selected}
         >
-          <Text style={styles.continueButtonText}>
-            {selected ? 'Continue' : 'Select your age range'}
-          </Text>
-          {selected && (
-            <View style={styles.continueArrow}>
-              <Ionicons name="arrow-forward" size={18} color="#FFF" />
+          {selected ? (
+            <LinearGradient
+              colors={['#FF416C', '#FF4B2B']}
+              start={{x:0, y:0}} end={{x:1, y:0}}
+              style={styles.continueButtonGradient}
+            >
+              <Text style={styles.continueButtonText}>Continue</Text>
+              <View style={styles.continueArrow}>
+                <Ionicons name="arrow-forward" size={18} color="#FFF" />
+              </View>
+            </LinearGradient>
+          ) : (
+            <View style={styles.continueButtonDisabled}>
+              <Text style={styles.continueButtonText}>Select your age range</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -257,7 +266,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: 'rgba(130, 90, 59, 0.03)',
+    backgroundColor: 'rgba(255, 126, 95, 0.05)',
   },
   decorTop: { top: -50, left: -70 },
   decorBottom: { bottom: 60, right: -60 },
@@ -289,19 +298,20 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 20,
-    backgroundColor: 'rgba(130, 90, 59, 0.08)',
+    backgroundColor: 'rgba(255, 126, 95, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   title: {
-    fontSize: 26,
-    color: '#4A2E12',
+    fontSize: 28,
+    color: '#1D2B64',
     fontFamily: 'serif',
     letterSpacing: 0.5,
     marginBottom: 8,
     textAlign: 'center',
-    lineHeight: 34,
+    lineHeight: 36,
+    fontWeight: '800',
   },
   subtitle: {
     fontSize: 14,
@@ -341,8 +351,8 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   ageRowSelected: {
-    borderColor: '#825A3B',
-    backgroundColor: 'rgba(130, 90, 59, 0.04)',
+    borderColor: '#FF7E5F',
+    backgroundColor: 'rgba(255, 126, 95, 0.04)',
   },
 
   // Emoji
@@ -356,7 +366,7 @@ const styles = StyleSheet.create({
     marginRight: 14,
   },
   emojiBoxSelected: {
-    backgroundColor: 'rgba(130, 90, 59, 0.12)',
+    backgroundColor: 'rgba(255, 126, 95, 0.12)',
   },
   emoji: {
     fontSize: 22,
@@ -373,7 +383,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   ageLabelSelected: {
-    color: '#825A3B',
+    color: '#FF7E5F',
   },
   ageDesc: {
     fontSize: 12,
@@ -393,13 +403,13 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   radioSelected: {
-    borderColor: '#825A3B',
+    borderColor: '#FF7E5F',
   },
   radioDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#825A3B',
+    backgroundColor: '#FF7E5F',
   },
 
   // Info
@@ -418,30 +428,38 @@ const styles = StyleSheet.create({
   },
 
   // Continue button
-  continueButton: {
-    backgroundColor: '#5C3318',
+  continueButtonWrapper: {
     width: '100%',
-    paddingVertical: 17,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
     marginTop: 14,
-    shadowColor: '#3A1E0A',
+    shadowColor: '#FF416C',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.3,
     shadowRadius: 12,
-    elevation: 5,
+    elevation: 6,
   },
-  continueButtonDisabled: {
-    backgroundColor: '#C4B5A5',
+  continueButtonDisabledWrapper: {
     shadowOpacity: 0,
     elevation: 0,
+  },
+  continueButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 17,
+    borderRadius: 28,
+  },
+  continueButtonDisabled: {
+    backgroundColor: '#EAEAEA',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 17,
+    borderRadius: 28,
   },
   continueButtonText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 0.3,
   },
   continueArrow: {

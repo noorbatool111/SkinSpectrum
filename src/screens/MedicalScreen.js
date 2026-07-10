@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 
@@ -113,7 +114,7 @@ const MedicalScreen = ({ navigation }) => {
       >
         {/* Medical icon */}
         <View style={styles.iconContainer}>
-          <MaterialCommunityIcons name="heart-pulse" size={36} color="#825A3B" />
+          <MaterialCommunityIcons name="heart-pulse" size={36} color="#FF7E5F" />
         </View>
 
         <Text style={styles.title}>Medical disclaimer</Text>
@@ -142,12 +143,12 @@ const MedicalScreen = ({ navigation }) => {
               <View style={styles.disclaimerHeader}>
                 <View style={styles.disclaimerIconBox}>
                   {item.lib === 'ionicons' ? (
-                    <Ionicons name={item.icon} size={18} color="#825A3B" />
+                    <Ionicons name={item.icon} size={18} color="#FF7E5F" />
                   ) : (
                     <MaterialCommunityIcons
                       name={item.icon}
                       size={18}
-                      color="#825A3B"
+                      color="#FF7E5F"
                     />
                   )}
                 </View>
@@ -188,19 +189,27 @@ const MedicalScreen = ({ navigation }) => {
           {/* Continue Button */}
           <TouchableOpacity
             style={[
-              styles.continueButton,
-              !acknowledged && styles.continueButtonDisabled,
+              styles.continueButtonWrapper,
+              !acknowledged && styles.continueButtonDisabledWrapper,
             ]}
             onPress={handleContinue}
             activeOpacity={0.85}
             disabled={!acknowledged}
           >
-            <Text style={styles.continueButtonText}>
-              {acknowledged ? 'I Understand, Continue' : 'Please acknowledge to continue'}
-            </Text>
-            {acknowledged && (
-              <View style={styles.continueArrow}>
-                <Ionicons name="arrow-forward" size={18} color="#FFF" />
+            {acknowledged ? (
+              <LinearGradient
+                colors={['#FF416C', '#FF4B2B']}
+                start={{x:0, y:0}} end={{x:1, y:0}}
+                style={styles.continueButtonGradient}
+              >
+                <Text style={styles.continueButtonText}>I Understand, Continue</Text>
+                <View style={styles.continueArrow}>
+                  <Ionicons name="arrow-forward" size={18} color="#FFF" />
+                </View>
+              </LinearGradient>
+            ) : (
+              <View style={styles.continueButtonDisabled}>
+                <Text style={styles.continueButtonText}>Please acknowledge to continue</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -222,7 +231,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: 'rgba(130, 90, 59, 0.03)',
+    backgroundColor: 'rgba(255, 126, 95, 0.05)',
   },
   decorTop: { top: -60, right: -60 },
   decorBottom: { bottom: 80, left: -80 },
@@ -254,17 +263,18 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 20,
-    backgroundColor: 'rgba(130, 90, 59, 0.08)',
+    backgroundColor: 'rgba(255, 126, 95, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   title: {
     fontSize: 28,
-    color: '#4A2E12',
+    color: '#1D2B64',
     fontFamily: 'serif',
     letterSpacing: 0.5,
     marginBottom: 8,
+    fontWeight: '800',
   },
   subtitle: {
     fontSize: 14,
@@ -309,7 +319,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: 'rgba(130, 90, 59, 0.1)',
+    backgroundColor: 'rgba(255, 126, 95, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
@@ -340,8 +350,8 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   acknowledgeRowActive: {
-    borderColor: '#825A3B',
-    backgroundColor: 'rgba(130, 90, 59, 0.04)',
+    borderColor: '#FF7E5F',
+    backgroundColor: 'rgba(255, 126, 95, 0.04)',
   },
 
   // Toggle switch
@@ -356,7 +366,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   toggleActive: {
-    backgroundColor: '#825A3B',
+    backgroundColor: '#FF7E5F',
   },
   toggleKnob: {
     width: 20,
@@ -382,39 +392,38 @@ const styles = StyleSheet.create({
   },
 
   // Continue button
-  continueButton: {
-    backgroundColor: '#5C3318',
+  continueButtonWrapper: {
     width: '100%',
-    paddingVertical: 17,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    shadowColor: '#3A1E0A',
+    shadowColor: '#FF416C',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.3,
     shadowRadius: 12,
-    elevation: 5,
+    elevation: 6,
   },
-  continueButtonDisabled: {
-    backgroundColor: '#C4B5A5',
+  continueButtonDisabledWrapper: {
     shadowOpacity: 0,
     elevation: 0,
+  },
+  continueButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 17,
+    borderRadius: 28,
+  },
+  continueButtonDisabled: {
+    backgroundColor: '#EAEAEA',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 17,
+    borderRadius: 28,
   },
   continueButtonText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 0.3,
-  },
-  continueArrow: {
-    marginLeft: 10,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
 

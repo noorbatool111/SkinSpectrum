@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 const LOGO_SIZE = width * 0.45;
@@ -151,12 +152,12 @@ const IntroScreen = ({ navigation }) => {
           {features.map((feature, index) => (
             <View key={index} style={styles.pill}>
               {feature.lib === 'ionicons' ? (
-                <Ionicons name={feature.icon} size={16} color="#825A3B" />
+                <Ionicons name={feature.icon} size={16} color="#FF416C" />
               ) : (
                 <MaterialCommunityIcons
                   name={feature.icon}
                   size={16}
-                  color="#825A3B"
+                  color="#FF416C"
                 />
               )}
               <Text style={styles.pillText}>{feature.label}</Text>
@@ -175,14 +176,20 @@ const IntroScreen = ({ navigation }) => {
           ]}
         >
           <TouchableOpacity
-            style={styles.primaryButton}
+            style={styles.primaryButtonWrapper}
             onPress={() => navigation.navigate('Signup')}
             activeOpacity={0.85}
           >
-            <Text style={styles.primaryButtonText}>Get Started</Text>
-            <View style={styles.buttonArrow}>
-              <Ionicons name="arrow-forward" size={20} color="#FFF" />
-            </View>
+            <LinearGradient
+              colors={['#FF416C', '#FF4B2B']}
+              start={{x:0, y:0}} end={{x:1, y:0}}
+              style={styles.primaryButton}
+            >
+              <Text style={styles.primaryButtonText}>Get Started</Text>
+              <View style={styles.buttonArrow}>
+                <Ionicons name="arrow-forward" size={20} color="#FFF" />
+              </View>
+            </LinearGradient>
           </TouchableOpacity>
 
           <View style={styles.signInRow}>
@@ -212,7 +219,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: 'rgba(130, 90, 59, 0.03)',
+    backgroundColor: 'rgba(255, 126, 95, 0.05)',
   },
   decorTopRight: { top: -60, right: -60 },
   decorBottomLeft: { bottom: 40, left: -80 },
@@ -234,7 +241,7 @@ const styles = StyleSheet.create({
     width: LOGO_SIZE + 20,
     height: LOGO_SIZE + 20,
     borderRadius: (LOGO_SIZE + 20) / 2,
-    backgroundColor: 'rgba(130, 90, 59, 0.04)',
+    backgroundColor: 'rgba(255, 126, 95, 0.06)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -242,11 +249,12 @@ const styles = StyleSheet.create({
     width: LOGO_SIZE,
     height: LOGO_SIZE,
     borderRadius: LOGO_SIZE / 2,
-    shadowColor: '#825A3B',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 6,
+    shadowColor: '#FF7E5F',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 8,
+    backgroundColor: '#FFF',
   },
   logoImage: {
     width: LOGO_SIZE,
@@ -259,12 +267,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   title: {
-    fontSize: 26,
-    color: '#4A2E12',
+    fontSize: 28,
+    color: '#1D2B64',
     fontFamily: 'serif',
     textAlign: 'center',
     marginBottom: 14,
-    lineHeight: 34,
+    lineHeight: 36,
+    fontWeight: '800',
   },
   subtitle: {
     fontSize: 15,
@@ -273,8 +282,8 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   highlight: {
-    color: '#825A3B',
-    fontWeight: '700',
+    color: '#FF416C',
+    fontWeight: '800',
   },
 
   // Feature pills
@@ -286,16 +295,16 @@ const styles = StyleSheet.create({
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(130, 90, 59, 0.08)',
+    backgroundColor: 'rgba(255, 126, 95, 0.1)',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
     gap: 6,
   },
   pillText: {
-    fontSize: 12,
-    color: '#6B4D35',
-    fontWeight: '600',
+    fontSize: 13,
+    color: '#FF416C',
+    fontWeight: '700',
     letterSpacing: 0.3,
   },
 
@@ -303,19 +312,21 @@ const styles = StyleSheet.create({
   buttonSection: {
     width: '100%',
   },
+  primaryButtonWrapper: {
+    width: '100%',
+    shadowColor: '#FF416C',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    elevation: 8,
+  },
   primaryButton: {
-    backgroundColor: '#5C3318',
     width: '100%',
     paddingVertical: 18,
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    shadowColor: '#3A1E0A',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 6,
   },
   primaryButtonText: {
     color: '#FFF',
@@ -342,9 +353,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   signInLink: {
-    color: '#5C3318',
-    fontSize: 14,
-    fontWeight: '700',
+    color: '#FF416C',
+    fontSize: 15,
+    fontWeight: '800',
   },
 });
 

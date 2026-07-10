@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useUser } from '../context/UserContext';
 
 const ProfileScreen = ({ navigation }) => {
@@ -99,7 +100,12 @@ const ProfileScreen = ({ navigation }) => {
         contentContainerStyle={styles.scrollContent}
       >
         {/* Profile Card */}
-        <View style={styles.profileCard}>
+        <LinearGradient
+          colors={['#FF7E5F', '#FEB47B']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.profileCardGradient}
+        >
           <View style={styles.avatarSection}>
             <View style={styles.avatarLarge}>
               <Text style={styles.avatarLargeText}>
@@ -115,26 +121,27 @@ const ProfileScreen = ({ navigation }) => {
                     onChangeText={setEditedName}
                     autoFocus
                     placeholder="Enter name"
+                    placeholderTextColor="rgba(255,255,255,0.5)"
                   />
                   <TouchableOpacity onPress={handleSaveName} style={styles.saveAction}>
-                    <Ionicons name="checkmark-circle" size={28} color="#7B9E6B" />
+                    <Ionicons name="checkmark-circle" size={28} color="#FFF" />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setIsEditingName(false)}>
-                    <Ionicons name="close-circle" size={28} color="#C47B8E" />
+                    <Ionicons name="close-circle" size={28} color="rgba(255,255,255,0.8)" />
                   </TouchableOpacity>
                 </View>
               ) : (
                 <>
                   <Text style={styles.profileName}>{userName}</Text>
                   <TouchableOpacity onPress={() => setIsEditingName(true)}>
-                    <Ionicons name="create-outline" size={18} color="#825A3B" style={{ marginLeft: 8 }} />
+                    <Ionicons name="create-outline" size={18} color="#FFF" style={{ marginLeft: 8 }} />
                   </TouchableOpacity>
                 </>
               )}
             </View>
             <Text style={styles.profileEmail}>{userData?.email}</Text>
           </View>
-        </View>
+        </LinearGradient>
 
         {/* Categories */}
         <View style={styles.section}>
@@ -181,12 +188,18 @@ const ProfileScreen = ({ navigation }) => {
         {/* Global Actions */}
         <View style={[styles.section, { marginBottom: 40 }]}>
           <TouchableOpacity 
-            style={styles.logoutFullBtn} 
+            style={styles.logoutBtnWrapper} 
             onPress={handleLogout}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
           >
-            <Ionicons name="log-out" size={20} color="#FFF" style={{ marginRight: 8 }} />
-            <Text style={styles.logoutText}>Logout from Account</Text>
+            <LinearGradient
+              colors={['#FF416C', '#FF4B2B']}
+              start={{x:0, y:0}} end={{x:1, y:0}}
+              style={styles.logoutFullBtn}
+            >
+              <Ionicons name="log-out" size={22} color="#FFF" style={{ marginRight: 8 }} />
+              <Text style={styles.logoutText}>Logout from Account</Text>
+            </LinearGradient>
           </TouchableOpacity>
           
           <Text style={styles.versionText}>SkinSpectrum v1.0.0 Alpha</Text>
@@ -209,55 +222,64 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: 20,
-    backgroundColor: 'rgba(130, 90, 59, 0.06)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#4A2E12',
-    fontFamily: 'serif',
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1D2B64',
   },
   logoutBtnSmall: {
     width: 40,
     height: 40,
     borderRadius: 20,
+    backgroundColor: '#FFF',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 10,
-  },
-  profileCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 24,
-    marginBottom: 24,
-    alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  profileCardGradient: {
+    borderRadius: 24,
+    padding: 28,
+    marginBottom: 30,
+    alignItems: 'center',
+    shadowColor: '#FF7E5F',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  avatarSection: {
+    alignItems: 'center',
   },
   avatarLarge: {
     width: 90,
     height: 90,
     borderRadius: 45,
-    backgroundColor: '#825A3B',
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.5)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
-    shadowColor: '#825A3B',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
   },
   avatarLargeText: {
     fontSize: 36,
@@ -267,29 +289,29 @@ const styles = StyleSheet.create({
   nameEditSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   profileName: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#4A2E12',
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#FFF',
   },
   profileEmail: {
-    fontSize: 14,
-    color: '#8A7A64',
-    fontWeight: '500',
+    fontSize: 15,
+    color: 'rgba(255,255,255,0.9)',
+    fontWeight: '600',
   },
   nameInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FAF7F2',
+    backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: 12,
     paddingRight: 8,
   },
   nameInput: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#4A2E12',
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#FFF',
     paddingHorizontal: 12,
     paddingVertical: 8,
     minWidth: 150,
@@ -300,40 +322,40 @@ const styles = StyleSheet.create({
 
   // Sections
   section: {
-    marginBottom: 24,
+    marginBottom: 28,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#825A3B',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#1D2B64',
     marginBottom: 12,
     marginLeft: 4,
   },
   itemsCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFF',
     borderRadius: 20,
     paddingVertical: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.03)',
   },
   profileItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   multiItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   itemLeft: {
     flexDirection: 'row',
@@ -341,75 +363,77 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: 'rgba(130, 90, 59, 0.06)',
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#FAF6EF',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
   },
   itemLabel: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#8A7A64',
     fontWeight: '600',
     marginBottom: 2,
   },
   itemValue: {
-    fontSize: 15,
+    fontSize: 16,
     color: '#4A2E12',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   divider: {
     height: 1,
-    backgroundColor: '#FAF6EF',
-    marginLeft: 72,
+    backgroundColor: '#F5F5F5',
+    marginLeft: 80,
   },
 
   // Tags
   tagContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 6,
-    gap: 6,
+    marginTop: 8,
+    gap: 8,
   },
   tag: {
-    backgroundColor: 'rgba(130, 90, 59, 0.08)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+    backgroundColor: 'rgba(255, 126, 95, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
   },
   tagText: {
-    fontSize: 11,
-    color: '#825A3B',
+    fontSize: 12,
+    color: '#FF7E5F',
     fontWeight: '700',
   },
 
   // Logout
+  logoutBtnWrapper: {
+    width: '100%',
+    shadowColor: '#FF416C',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+    marginBottom: 20,
+  },
   logoutFullBtn: {
-    backgroundColor: '#C47B8E',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 16,
-    marginBottom: 20,
-    shadowColor: '#C47B8E',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 4,
+    paddingVertical: 18,
+    borderRadius: 24,
   },
   logoutText: {
     color: '#FFF',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '800',
   },
   versionText: {
     textAlign: 'center',
-    fontSize: 12,
-    color: '#B5A48E',
-    fontWeight: '500',
+    fontSize: 13,
+    color: '#A89E90',
+    fontWeight: '600',
   },
 });
 

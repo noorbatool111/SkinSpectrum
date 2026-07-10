@@ -13,3 +13,7 @@ python-jose
 transformers
 scipy
 tqdm
+flask
+flask-cors
+numpy
+opencv-python-headless
