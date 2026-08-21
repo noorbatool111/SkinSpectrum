@@ -31,9 +31,25 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# local env files & secrets
 .env
-.env*.local
+.env*
+*.env
+server/.env
+
+# Google Services / Firebase credentials
+google-services.json
+
+# Uploads directory
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
 
 # typescript
 *.tsbuildinfo

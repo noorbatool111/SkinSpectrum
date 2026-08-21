@@ -285,27 +285,29 @@ def _classify_face_shape(ratio, forehead_w, cheekbone_w, jaw_w, chin_w):
 
 def check_actual_redness(img_bgr, face_rect):
     """
-    Validates if the face actually contains a significant amount of red pixels
-    using HSV color space. Helps filter out false positives from the ML model.
+    Validates if the face actually contains a significant amount of intense red pixels
+    using the LAB color space (a* channel measures green-to-red).
+    Helps filter out false positives from the ML model on normal warm skin tones.
     """
     try:
         x, y, w, h = face_rect
         face_roi = img_bgr[y:y+h, x:x+w]
         
-        hsv = cv2.cvtColor(face_roi, cv2.COLOR_BGR2HSV)
+        # Convert to LAB color space
+        lab = cv2.cvtColor(face_roi, cv2.COLOR_BGR2LAB)
+        _, a_channel, _ = cv2.split(lab)
         
-        # Red hue wraps around 0/180 in OpenCV (H is 0-179)
-        # We look for colors that are distinctly red/pink
-        mask1 = cv2.inRange(hsv, np.array([0, 40, 50]), np.array([12, 255, 255]))
-        mask2 = cv2.inRange(hsv, np.array([165, 40, 50]), np.array([180, 255, 255]))
-        red_mask = cv2.bitwise_or(mask1, mask2)
+        # In OpenCV LAB, a* channel 128 is neutral.
+        # Normal skin ranges from ~130 to 145. 
+        # True redness (inflammation) pushes a* > 150.
+        _, red_mask = cv2.threshold(a_channel, 152, 255, cv2.THRESH_BINARY)
         
-        # Calculate percentage of red pixels
+        # Calculate percentage of highly red pixels
         red_ratio = cv2.countNonZero(red_mask) / (w * h)
-        print(f"[CV-Check] Redness pixel ratio: {red_ratio:.3f}")
+        print(f"[CV-Check] Intense Redness (a* > 152) ratio: {red_ratio:.3f}")
         
-        # If less than ~4% of the face is red, it's likely a false positive
-        return red_ratio > 0.04
+        # If less than ~1.5% of the face has intense redness, it's a false positive
+        return red_ratio > 0.015
     except Exception as e:
         print(f"[CV-Check] Redness error: {e}")
         return True # Default to true to not override model if CV fails
@@ -407,7 +409,7 @@ def analyze():
     skin_is_healthy = top_prob < SKIN_CONDITION_THRESHOLD
 
     if skin_is_healthy:
-        print(f"[SkinModel] Top prob {top_prob:.3f} < {SKIN_CONDITION_THRESHOLD} → treating as healthy skin")
+        print(f"[SkinModel] Top prob {top_prob:.3f} < {SKIN_CONDITION_THRESHOLD} -> treating as healthy skin")
 
     # Build severity map for all 8 conditions
     condition_severities = {}
@@ -437,7 +439,7 @@ def analyze():
     if acne_class == 'level0':
         acne_grade, acne_severity = 'Clear', 0
     elif acne_confidence < ACNE_CONFIDENCE_THRESHOLD:
-        print(f"[AcneModel] Confidence {acne_confidence:.3f} < {ACNE_CONFIDENCE_THRESHOLD} → defaulting to Clear")
+        print(f"[AcneModel] Confidence {acne_confidence:.3f} < {ACNE_CONFIDENCE_THRESHOLD} -> defaulting to Clear")
         acne_grade, acne_severity = 'Clear', 0
     else:
         acne_grade, acne_severity = grade_map.get(acne_class, ('Mild', 3))
